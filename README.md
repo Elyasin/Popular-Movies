@@ -2,7 +2,7 @@
 
 ## Instructions
 
-Insert you API key for TMDb in the corresponding String in the NetworkUtils.java file.
+Insert your API key for TMDb in the corresponding String in the NetworkUtils.java file.
 
 # License information
 
