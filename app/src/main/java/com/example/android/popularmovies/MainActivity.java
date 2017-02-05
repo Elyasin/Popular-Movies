@@ -117,8 +117,10 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
         Log.v(LOG_TAG, "Item selected: " + adapterView.getItemAtPosition(pos));
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
+            this.setTitle(getString(R.string.popular));
             queryMovieDatabase(false);
         } else {
+            this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(true);
         }
 
@@ -144,7 +146,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         Context context = MainActivity.this;
         Class destinationActivity = DetailActivity.class;
         Intent startDetailActivity = new Intent(context, destinationActivity);
-        startDetailActivity.putExtra("movie", movie);
+        startDetailActivity.putExtra(getString(R.string.movie_key), movie);
         startActivity(startDetailActivity);
     }
 
@@ -176,13 +178,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             try {
                 String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
                 movieArray = TMDbJsonUtils.getMoviesFromJson(responseStr);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
+            } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
 
-            Log.v(LOG_TAG, "Size of Movie array: " + movieArray.length);
+            Log.v(LOG_TAG, "Size of Movie array: " + (movieArray != null ? movieArray.length : 0));
 
             return movieArray;
         }

@@ -61,8 +61,8 @@ public class DetailActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         if (intent != null) {
-            if (intent.hasExtra("movie")) {
-                Movie movie = (Movie) intent.getSerializableExtra("movie");
+            if (intent.hasExtra(getString(R.string.movie_key))) {
+                Movie movie = (Movie) intent.getSerializableExtra(getString(R.string.movie_key));
 
                 String posterURLString = NetworkUtils.IMDB_IMAGE_BASE_URL + NetworkUtils.IMDB_IMAGE_SMALL_SIZE + movie.getPosterPath();
                 Picasso.with(this).load(posterURLString).into(mSmallPoster);
@@ -72,6 +72,8 @@ public class DetailActivity extends AppCompatActivity {
                 //Show only the year of the release date
                 mReleaseDate.setText(movie.getReleaseDate().substring(0, 4));
                 mVoteAverage.setText(Double.valueOf(movie.getVoteAverage()).toString() + "/10");
+
+                this.setTitle(movie.getTitle());
 
             }
         }

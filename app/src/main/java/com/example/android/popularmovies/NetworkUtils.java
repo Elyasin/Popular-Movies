@@ -56,10 +56,14 @@ public class NetworkUtils {
     final static String IMDB_IMAGE_SMALL_SIZE = "w92";  // for detail activity
 
     //TMDb URL components
-    final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/";
-    final static String TMDb_popular = "movie/popular";
-    final static String TMDb_top_rated = "movie/top_rated";
-    final static String API_KEY = "[YOU_HAVE_TO_PUT_AN_API_KEY_HERE - NetworkUtils.java]";
+    final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/movie/";
+    final static String TMDb_popular = "popular";
+    final static String TMDb_top_rated = "top_rated";
+    //trailers and reviews end point string must be preceded by a movie id
+    //to form e.g. http://api.themoviedb.org/3/movie/{id}/videos?api_key=...
+    final static String TMDb_trailers = "videos";
+    final static String TMDb_reviews = "reviews";
+    final static String API_KEY = "41debb3825c6a8223481cc10d2d44e18";
     final static String TMDb_QUERY_API = "?api_key=" + API_KEY;
 
 
