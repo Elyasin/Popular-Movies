@@ -17,6 +17,10 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    // Expose the API key for the TMDb for usa in Android
+    buildTypes.each {
+        it.buildConfigField 'String', 'TMDb_API_KEY', MyMovieDbApiKey
+    }
 }
 
 dependencies {

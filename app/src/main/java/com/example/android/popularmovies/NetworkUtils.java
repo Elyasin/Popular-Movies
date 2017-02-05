@@ -43,7 +43,6 @@ import java.util.Scanner;
  * <p>
  * Use @getResponseFromHttpUrl method to retrieve the movie data base on a URL.
  *
- * @// TODO: 26/01/2017 Remove API Key from source code and find a better solution.
  * @see Movie
  */
 public class NetworkUtils {
@@ -63,8 +62,7 @@ public class NetworkUtils {
     //to form e.g. http://api.themoviedb.org/3/movie/{id}/videos?api_key=...
     final static String TMDb_trailers = "videos";
     final static String TMDb_reviews = "reviews";
-    final static String API_KEY = "41debb3825c6a8223481cc10d2d44e18";
-    final static String TMDb_QUERY_API = "?api_key=" + API_KEY;
+    final static String TMDb_QUERY_API = "?api_key=" + BuildConfig.TMDb_API_KEY;
 
 
     /**
