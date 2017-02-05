@@ -13,6 +13,9 @@
         <item>@string/top_rated</item>
     </string-array>
 
+    <string name="main_poster_content_description">Main poster of a movie</string>
+    <string name="small_poster_content_description">Small poster of a movie</string>
+
     <string name="movie_key">movie</string>
 
 </resources>
