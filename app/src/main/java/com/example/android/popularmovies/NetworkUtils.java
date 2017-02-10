@@ -64,6 +64,10 @@ public class NetworkUtils {
     final static String TMDb_reviews = "reviews";
     final static String TMDb_QUERY_API = "?api_key=" + BuildConfig.TMDb_API_KEY;
 
+    //Youtube base URL
+    final static String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
+    final static String YOUTUBE_VIDEO_KEY = "";
+
 
     /**
      * Builds the URL used to query TMDb.

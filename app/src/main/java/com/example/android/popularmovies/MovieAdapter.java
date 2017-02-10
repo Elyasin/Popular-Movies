@@ -56,8 +56,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
      * @param clickHandler - the Activity implementing the MovieAdapterOnClickHandler
      */
     public MovieAdapter(Context context, MovieAdapterOnClickHandler clickHandler) {
-        mContext = context;
-        mClickHandler = clickHandler;
+        this.mContext = context;
+        this.mClickHandler = clickHandler;
     }
 
     /**
@@ -105,9 +105,8 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
      */
     public MovieAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
         Context context = viewGroup.getContext();
-        int movie_grid_item = R.layout.movie_grid_item;
         LayoutInflater inflater = LayoutInflater.from(context);
-        View view = inflater.inflate(movie_grid_item, viewGroup, false);
+        View view = inflater.inflate(R.layout.movie_grid_item, viewGroup, false);
         return new MovieAdapterViewHolder(view);
     }
 

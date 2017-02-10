@@ -23,7 +23,6 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -39,16 +38,15 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import org.json.JSONException;
-
-import java.io.IOException;
 import java.net.URL;
 
 /**
  * Main activity displaying selectable movie posters in a grid (based on LinearLayout).
  */
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, MovieAdapter.MovieAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements
+        AdapterView.OnItemSelectedListener,
+        MovieAdapter.MovieAdapterOnClickHandler {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -97,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     private void queryMovieDatabase(boolean rated) {
         if (NetworkUtils.isOnline()) {
             URL url = NetworkUtils.buildUrl(rated);
-            new MovieQueryTask().execute(url);
+            new MovieQueryTask(new MovieQueryTaskListener()).execute(url);
         } else {
             mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
             mRecyclerViewMovies.setVisibility(View.INVISIBLE);
@@ -119,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(false);
-        } else {
+        } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(true);
         }
@@ -150,64 +148,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         startActivity(startDetailActivity);
     }
 
-    /**
-     * Inner class to retreive movie data form the TMDb.
-     */
-    public class MovieQueryTask extends AsyncTask<URL, Void, Movie[]> {
-
-        /**
-         * Show the progress bar.
-         */
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-        }
-
-        /**
-         * Retreival of movie data in form of an Movie[] array.
-         *
-         * @param urls - Contains one URL at position 0.
-         * @return Movie[] array containing all retrieved movies information (only page 1).
-         */
-        @Override
-        protected Movie[] doInBackground(URL... urls) {
-            URL url = urls[0];
-            Movie movieArray[] = null;
-
-            try {
-                String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
-                movieArray = TMDbJsonUtils.getMoviesFromJson(responseStr);
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-
-            Log.v(LOG_TAG, "Size of Movie array: " + (movieArray != null ? movieArray.length : 0));
-
-            return movieArray;
-        }
-
-        /**
-         * Hide progress bar.
-         * Show movie posters if ok, otherwise diaply error message.
-         *
-         * @param movieArray - The result of retrieved movie data (if any).
-         */
-        @Override
-        protected void onPostExecute(Movie[] movieArray) {
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-
-            if (movieArray != null) {
-                mRecyclerViewMovies.setVisibility(View.VISIBLE);
-                mErrorMessageDisplay.setVisibility(View.INVISIBLE);
-                mMovieAdapter.setMovieData(movieArray);
-            } else {
-                mRecyclerViewMovies.setVisibility(View.INVISIBLE);
-                mErrorMessageDisplay.setVisibility(View.VISIBLE);
-            }
-
-        }
-    }
 
     /**
      * Add a spinner with two options (popular and top-rated) to the menu.
@@ -232,5 +172,32 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         spinner.setAdapter(adapter);
 
         return true;
+    }
+
+    /**
+     *
+     */
+    public class MovieQueryTaskListener implements AsyncTaskListener<Movie[]> {
+
+        @Override
+        public void onTaskComplete(Movie[] movieArray) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+            if (movieArray != null) {
+                mRecyclerViewMovies.setVisibility(View.VISIBLE);
+                mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+                mMovieAdapter.setMovieData(movieArray);
+            } else {
+                mRecyclerViewMovies.setVisibility(View.INVISIBLE);
+                mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        public void beforeTaskExecution() {
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+
     }
 }

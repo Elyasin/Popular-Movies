@@ -33,16 +33,6 @@ import com.squareup.picasso.Picasso;
  */
 public class DetailActivity extends AppCompatActivity {
 
-    private ImageView mSmallPoster;
-
-    private TextView mTitle;
-
-    private TextView mOverview;
-
-    private TextView mReleaseDate;
-
-    private TextView mVoteAverage;
-
     /**
      * Sets up the activity with data passed through the Intent.
      *
@@ -53,11 +43,11 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mSmallPoster = (ImageView) findViewById(R.id.iv_small_poster);
-        mTitle = (TextView) findViewById(R.id.tv_title);
-        mOverview = (TextView) findViewById(R.id.tv_overview);
-        mReleaseDate = (TextView) findViewById(R.id.tv_release_date);
-        mVoteAverage = (TextView) findViewById(R.id.tv_vote_average);
+        ImageView mSmallPoster = (ImageView) findViewById(R.id.iv_small_poster);
+        TextView mTitle = (TextView) findViewById(R.id.tv_title);
+        TextView mOverview = (TextView) findViewById(R.id.tv_overview);
+        TextView mReleaseDate = (TextView) findViewById(R.id.tv_release_date);
+        TextView mVoteAverage = (TextView) findViewById(R.id.tv_vote_average);
 
         Intent intent = getIntent();
         if (intent != null) {
