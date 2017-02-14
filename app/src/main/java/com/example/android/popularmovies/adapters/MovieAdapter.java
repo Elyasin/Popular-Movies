@@ -18,7 +18,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +28,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.example.android.popularmovies.utilities.NetworkUtils;
+import com.example.android.popularmovies.R;
+import com.example.android.popularmovies.models.Movie;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -41,7 +44,8 @@ import com.squareup.picasso.Picasso;
  * delegates the onClick call the parent class' MovieAdapterOnClickHandler.
  */
 
-public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
+public class MovieAdapter
+        extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
 
@@ -118,7 +122,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieAdapter
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
         String posterURLString = NetworkUtils.IMDB_IMAGE_BASE_URL + NetworkUtils.IMDB_IMAGE_SIZE + mMovies[position].getPosterPath();
-        Log.v(LOG_TAG, posterURLString);
+        Log.d(LOG_TAG, posterURLString);
         Picasso.with(mContext).load(posterURLString).into(holder.mPoster);
     }
 

@@ -17,5 +17,9 @@
     <string name="small_poster_content_description">Small poster of a movie</string>
 
     <string name="movie_key">movie</string>
+    <string name="triangle">Triangle</string>
+    <string name="vote_average_by_ten">%.2f / 10</string>
+    <string name="trailers_title">Trailers:</string>
+    <string name="trailer_text"> Trailer video link</string>
 
 </resources>

@@ -19,14 +19,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.models;
 
 import java.io.Serializable;
 
-/**
- * Movie class holds information about a movie: ID, relative path to poster, plot (aka overview),
- * release date and vote average.
- */
 public class Movie implements Serializable {
 
     private int mMovieID;
@@ -34,7 +30,9 @@ public class Movie implements Serializable {
     private String mOverview;
     private String mReleaseDate;
     private String mTitle;
-    double mVoteAverage;
+    private double mVoteAverage;
+    private Trailer[] mTrailersArray;
+    private Review[] mReviewArray;
 
     public Movie(int movieID, String posterPath, String overview, String releaseDate, String title, double voteAverage) {
         setMovieID(movieID);
@@ -43,6 +41,22 @@ public class Movie implements Serializable {
         setReleaseDate(releaseDate);
         setTitle(title);
         setVoteAverage(voteAverage);
+    }
+
+    public Trailer[] getTrailerArray() {
+        return mTrailersArray;
+    }
+
+    public void setTrailerArray(Trailer[] trailerArray) {
+        this.mTrailersArray = trailerArray;
+    }
+
+    public Review[] getmReviewArray() {
+        return mReviewArray;
+    }
+
+    public void setmReviewArray(Review[] mReviewArray) {
+        this.mReviewArray = mReviewArray;
     }
 
     public int getMovieID() {
@@ -92,4 +106,5 @@ public class Movie implements Serializable {
     public void setVoteAverage(double mVoteAverage) {
         this.mVoteAverage = mVoteAverage;
     }
+
 }

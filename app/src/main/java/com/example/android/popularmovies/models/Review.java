@@ -19,25 +19,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.models;
 
-/**
- * This is a useful callback mechanism so we can abstract our AsyncTasks out into separate,
- * re-usable and testable classes yet still retain a hook back into the calling activity.
- * Basically, it'll make classes cleaner and easier to unit test.
- *
- * @param <Type>
- */
-public interface AsyncTaskListener<Type> {
-    /**
-     * Invoked when the AsyncTask has completed its execution.
-     *
-     * @param result The resulting object from the AsyncTask.
-     */
-    public void onTaskComplete(Type result);
+public class Review {
 
-    /**
-     * Invoked before the AsyncTask is executed.
-     */
-    public void beforeTaskExecution();
+    private String reviewID;
+    private String author;
+    private String content;
+    private String urlString;
+
+    public Review(String reviewID, String author, String content, String urlString) {
+        this.reviewID = reviewID;
+        this.author = author;
+        this.content = content;
+        this.urlString = urlString;
+    }
+
+    public String getReviewID() {
+        return reviewID;
+    }
+
+    public void setReviewID(String reviewID) {
+        this.reviewID = reviewID;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getUrlString() {
+        return urlString;
+    }
+
+    public void setUrlString(String urlString) {
+        this.urlString = urlString;
+    }
+
 }

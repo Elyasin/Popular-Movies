@@ -18,10 +18,13 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.utilities;
 
 import android.net.Uri;
 import android.util.Log;
+
+import com.example.android.popularmovies.BuildConfig;
+import com.example.android.popularmovies.models.Movie;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,42 +53,74 @@ public class NetworkUtils {
     private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
 
     // Image URL components
-    final static String IMDB_IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-    final static String IMDB_IMAGE_SIZE = "w185";       // for main activity
-    final static String IMDB_IMAGE_SMALL_SIZE = "w92";  // for detail activity
+    public final static String IMDB_IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
+    public final static String IMDB_IMAGE_SIZE = "w185";       // for main activity
+    public final static String IMDB_IMAGE_SMALL_SIZE = "w92";  // for detail activity
 
     //TMDb URL components
-    final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/movie/";
-    final static String TMDb_popular = "popular";
-    final static String TMDb_top_rated = "top_rated";
+    public final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/movie/";
+    public final static String TMDb_popular = "popular";
+    public final static String TMDb_top_rated = "top_rated";
     //trailers and reviews end point string must be preceded by a movie id
     //to form e.g. http://api.themoviedb.org/3/movie/{id}/videos?api_key=...
-    final static String TMDb_trailers = "videos";
-    final static String TMDb_reviews = "reviews";
-    final static String TMDb_QUERY_API = "?api_key=" + BuildConfig.TMDb_API_KEY;
+    public final static String TMDb_trailers = "videos";
+    public final static String TMDb_reviews = "reviews";
+    public final static String TMDb_QUERY_API_KEY_PARAM = "api_key";
+    public final static String TMDb_QUERY_API_KEY_VALUE = BuildConfig.TMDb_API_KEY;
+
+    //Request videos and reviews together with a movie data
+    public final static String TMDb_QUERY_APPEND_TO_RESPONSE_KEY = "append_to_response";
+    public final static String TMDb_QUERY_APPEND_TO_RESPONSE_VALUES = "videos,reviews";
 
     //Youtube base URL
-    final static String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
-    final static String YOUTUBE_VIDEO_KEY = "";
+    public final static String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
 
 
     /**
-     * Builds the URL used to query TMDb.
+     * Builds the URL used to query TMDb for list of movies.
      *
      * @param rated If True then query top-rated movies otherwise most popular movies.
      * @return The URL used to query the TMDb server.
      */
-    public static URL buildUrl(boolean rated) {
+    public static URL buildMoviesURL(boolean rated) {
 
         Uri builtUri = Uri.parse(TMDb_BASE_URL);
 
         if (rated) {
-            builtUri = builtUri.buildUpon().appendEncodedPath(TMDb_top_rated).appendEncodedPath(TMDb_QUERY_API).build();
+            builtUri = builtUri.buildUpon().
+                    appendEncodedPath(TMDb_top_rated).
+                    appendQueryParameter(TMDb_QUERY_API_KEY_PARAM, BuildConfig.TMDb_API_KEY).
+                    build();
         } else {
-            builtUri = builtUri.buildUpon().appendEncodedPath(TMDb_popular).appendEncodedPath(TMDb_QUERY_API).build();
+            builtUri = builtUri.buildUpon().
+                    appendEncodedPath(TMDb_popular).
+                    appendQueryParameter(TMDb_QUERY_API_KEY_PARAM, BuildConfig.TMDb_API_KEY).
+                    build();
         }
 
-        Log.v(LOG_TAG, builtUri.toString());
+        Log.d(LOG_TAG, builtUri.toString());
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+    public static URL buildMovieURL(String movieId) {
+
+        Uri builtUri = Uri.parse(TMDb_BASE_URL);
+
+        builtUri = builtUri.buildUpon().
+                appendEncodedPath(movieId).
+                appendQueryParameter(TMDb_QUERY_API_KEY_PARAM, TMDb_QUERY_API_KEY_VALUE).
+                appendQueryParameter(TMDb_QUERY_APPEND_TO_RESPONSE_KEY, TMDb_QUERY_APPEND_TO_RESPONSE_VALUES).
+                build();
+
+        Log.d(LOG_TAG, builtUri.toString());
 
         URL url = null;
         try {

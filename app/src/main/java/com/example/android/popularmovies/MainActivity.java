@@ -38,6 +38,12 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.example.android.popularmovies.adapters.MovieAdapter;
+import com.example.android.popularmovies.asyncTasks.AsyncTaskListener;
+import com.example.android.popularmovies.asyncTasks.MoviesQueryTask;
+import com.example.android.popularmovies.models.Movie;
+import com.example.android.popularmovies.utilities.NetworkUtils;
+
 import java.net.URL;
 
 /**
@@ -88,14 +94,14 @@ public class MainActivity extends AppCompatActivity implements
 
     /**
      * This method constructs the URL (using {@link NetworkUtils}) and fires off
-     * an AsyncTask to perform the GET request using our {@link MovieQueryTask}
+     * an AsyncTask to perform the GET request using our {@link MoviesQueryTask}
      *
      * @param rated - If true queries with top-rated URL, otherwise popular URL.
      */
     private void queryMovieDatabase(boolean rated) {
         if (NetworkUtils.isOnline()) {
-            URL url = NetworkUtils.buildUrl(rated);
-            new MovieQueryTask(new MovieQueryTaskListener()).execute(url);
+            URL url = NetworkUtils.buildMoviesURL(rated);
+            new MoviesQueryTask(new MoviesQueryTaskListener()).execute(url);
         } else {
             mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
             mRecyclerViewMovies.setVisibility(View.INVISIBLE);
@@ -175,9 +181,12 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     *
+     * Listener executes onPreExecute and onPostExecute functionality of corresponding
+     * MoviesQueryTask.
+     * <p>
+     * Suitable in order to access activity's members (views, adapter, etc.)
      */
-    public class MovieQueryTaskListener implements AsyncTaskListener<Movie[]> {
+    public class MoviesQueryTaskListener implements AsyncTaskListener<Movie[]> {
 
         @Override
         public void onTaskComplete(Movie[] movieArray) {
@@ -197,7 +206,6 @@ public class MainActivity extends AppCompatActivity implements
         public void beforeTaskExecution() {
             mLoadingIndicator.setVisibility(View.VISIBLE);
         }
-
 
     }
 }

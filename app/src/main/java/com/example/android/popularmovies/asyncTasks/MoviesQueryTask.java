@@ -19,10 +19,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package com.example.android.popularmovies;
+package com.example.android.popularmovies.asyncTasks;
 
 import android.os.AsyncTask;
 import android.util.Log;
+
+import com.example.android.popularmovies.utilities.NetworkUtils;
+import com.example.android.popularmovies.utilities.TMDbJsonUtils;
+import com.example.android.popularmovies.models.Movie;
 
 import org.json.JSONException;
 
@@ -30,15 +34,15 @@ import java.io.IOException;
 import java.net.URL;
 
 /**
- * Inner class to retreive movie data form the TMDb.
+ * AsyncTask to download list of movies.
  */
-class MovieQueryTask extends AsyncTask<URL, Void, Movie[]> {
+public class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
 
-    private static final String LOG_TAG = MovieQueryTask.class.getSimpleName();
+    private static final String LOG_TAG = MoviesQueryTask.class.getSimpleName();
 
     private AsyncTaskListener<Movie[]> mListener;
 
-    MovieQueryTask(AsyncTaskListener<Movie[]> listener) {
+    public MoviesQueryTask(AsyncTaskListener<Movie[]> listener) {
         this.mListener = listener;
     }
 
@@ -69,14 +73,14 @@ class MovieQueryTask extends AsyncTask<URL, Void, Movie[]> {
             e.printStackTrace();
         }
 
-        Log.v(LOG_TAG, "Size of Movie array: " + (movieArray != null ? movieArray.length : 0));
+        Log.d(LOG_TAG, "Size of Movie array: " + (movieArray != null ? movieArray.length : 0));
 
         return movieArray;
     }
 
     /**
      * Hide progress bar.
-     * Show movie posters if ok, otherwise diaply error message.
+     * Show movie posters if ok, otherwise display error message.
      *
      * @param movieArray - The result of retrieved movie data (if any).
      */
