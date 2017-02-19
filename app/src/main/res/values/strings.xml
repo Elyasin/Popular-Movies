@@ -5,21 +5,29 @@
 
     <string name="popular">Popular</string>
     <string name="top_rated">Top Rated</string>
+    <string name="favorite">My favorites</string>
+
 
     <string name="no_internet_access">You don\'t seem to have internet access. Cannot retrieve data.</string>
 
     <string-array name="spinner_items">
         <item>@string/popular</item>
         <item>@string/top_rated</item>
+        <item>@string/favorite</item>
     </string-array>
 
     <string name="main_poster_content_description">Main poster of a movie</string>
     <string name="small_poster_content_description">Small poster of a movie</string>
 
     <string name="movie_key">movie</string>
-    <string name="triangle">Triangle</string>
-    <string name="vote_average_by_ten">%.2f / 10</string>
+    <string name="runtime">%dmin</string>
+    <string name="vote_average_by_ten">%.2f/10</string>
     <string name="trailers_title">Trailers:</string>
     <string name="trailer_text"> Trailer video link</string>
+    <string name="mark_as_favorite">Mark as Favorite</string>
+    <string name="remove_from_favorite">Remove from Favorite</string>
+    <string name="reviews_title">Reviews:</string>
+    <string name="review_text">This is a review content. Lorum ipsum movie was very bad and amazing.</string>
+    <string name="review_author_text">%s says:</string>
 
 </resources>

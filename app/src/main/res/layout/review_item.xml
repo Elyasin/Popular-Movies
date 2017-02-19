@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
 MIT License
 
 Copyright (c) 2017 Elyasin Shaladi
@@ -20,7 +18,6 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FO
 DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -28,17 +25,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tv_trailer"
+        android:id="@+id/tv_review_author"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/linear_layout_margin"
-        android:drawableLeft="@android:drawable/ic_media_play"
-        android:drawablePadding="@dimen/title_padding"
-        android:drawableStart="@android:drawable/ic_media_play"
         android:gravity="center|start"
-        android:text="@string/trailer_text"
-        android:textSize="@dimen/trailer_text_size"
-        tools:text="@string/trailer_text" />
+        android:text="@string/review_author_text"
+        android:textSize="@dimen/review_author_text_size"
+        android:textStyle="bold"
+        tools:text="Reviewer1 says:" />
+
+    <TextView
+        android:id="@+id/tv_review_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/linear_layout_margin"
+        android:layout_marginLeft="@dimen/linear_layout_margin"
+        android:layout_marginRight="@dimen/linear_layout_margin"
+        android:gravity="center|start"
+        android:text="@string/review_text"
+        android:textSize="@dimen/review_text_size"
+        tools:text="@string/review_text" />
 
     <View
         android:layout_width="fill_parent"
@@ -46,6 +53,3 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
         android:background="#c0c0c0" />
 
 </LinearLayout>
-
-
-

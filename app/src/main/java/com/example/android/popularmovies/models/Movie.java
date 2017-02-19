@@ -30,6 +30,7 @@ public class Movie implements Serializable {
     private String mOverview;
     private String mReleaseDate;
     private String mTitle;
+    private int mRuntime;
     private double mVoteAverage;
     private Trailer[] mTrailersArray;
     private Review[] mReviewArray;
@@ -105,6 +106,14 @@ public class Movie implements Serializable {
 
     public void setVoteAverage(double mVoteAverage) {
         this.mVoteAverage = mVoteAverage;
+    }
+
+    public int getRuntime() {
+        return mRuntime;
+    }
+
+    public void setRuntime(int runtime) {
+        this.mRuntime = runtime;
     }
 
 }

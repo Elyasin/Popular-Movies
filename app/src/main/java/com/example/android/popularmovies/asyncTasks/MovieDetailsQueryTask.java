@@ -23,9 +23,9 @@ package com.example.android.popularmovies.asyncTasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbJsonUtils;
-import com.example.android.popularmovies.models.Movie;
 
 import org.json.JSONException;
 
@@ -35,13 +35,13 @@ import java.net.URL;
 /**
  * AsyncTask to download list of movies.
  */
-public class MovieQueryTask extends AsyncTask<URL, Void, Movie> {
+public class MovieDetailsQueryTask extends AsyncTask<URL, Void, Movie> {
 
-    private static final String LOG_TAG = MovieQueryTask.class.getSimpleName();
+    private static final String LOG_TAG = MovieDetailsQueryTask.class.getSimpleName();
 
     private AsyncTaskListener<Movie> mListener;
 
-    public MovieQueryTask(AsyncTaskListener<Movie> listener) {
+    public MovieDetailsQueryTask(AsyncTaskListener<Movie> listener) {
         this.mListener = listener;
     }
 

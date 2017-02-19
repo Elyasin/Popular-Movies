@@ -21,7 +21,6 @@
 package com.example.android.popularmovies.utilities;
 
 import android.net.Uri;
-import android.util.Log;
 
 import com.example.android.popularmovies.BuildConfig;
 import com.example.android.popularmovies.models.Movie;
@@ -98,7 +97,6 @@ public class NetworkUtils {
                     build();
         }
 
-        Log.d(LOG_TAG, builtUri.toString());
 
         URL url = null;
         try {
@@ -120,7 +118,6 @@ public class NetworkUtils {
                 appendQueryParameter(TMDb_QUERY_APPEND_TO_RESPONSE_KEY, TMDb_QUERY_APPEND_TO_RESPONSE_VALUES).
                 build();
 
-        Log.d(LOG_TAG, builtUri.toString());
 
         URL url = null;
         try {

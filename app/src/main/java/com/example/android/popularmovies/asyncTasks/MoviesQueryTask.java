@@ -22,11 +22,10 @@
 package com.example.android.popularmovies.asyncTasks;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
+import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.example.android.popularmovies.utilities.TMDbJsonUtils;
-import com.example.android.popularmovies.models.Movie;
 
 import org.json.JSONException;
 
@@ -72,8 +71,6 @@ public class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
-
-        Log.d(LOG_TAG, "Size of Movie array: " + (movieArray != null ? movieArray.length : 0));
 
         return movieArray;
     }

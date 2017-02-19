@@ -76,6 +76,8 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message);
+        mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
+
 
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
@@ -103,7 +105,6 @@ public class MainActivity extends AppCompatActivity implements
             URL url = NetworkUtils.buildMoviesURL(rated);
             new MoviesQueryTask(new MoviesQueryTaskListener()).execute(url);
         } else {
-            mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
             mRecyclerViewMovies.setVisibility(View.INVISIBLE);
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
         }
@@ -119,13 +120,16 @@ public class MainActivity extends AppCompatActivity implements
      */
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
-        Log.v(LOG_TAG, "Item selected: " + adapterView.getItemAtPosition(pos));
+
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(false);
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(true);
+        } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.favorite))) {
+            this.setTitle(getString(R.string.favorite));
+            Log.d(LOG_TAG, "Display Favorite movies");
         }
 
     }
@@ -150,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements
         Context context = MainActivity.this;
         Class destinationActivity = DetailActivity.class;
         Intent startDetailActivity = new Intent(context, destinationActivity);
-        startDetailActivity.putExtra(getString(R.string.movie_key), movie);
+        startDetailActivity.putExtra(getString(R.string.movie_key), movie.getMovieID());
         startActivity(startDetailActivity);
     }
 

@@ -20,8 +20,6 @@
  */
 package com.example.android.popularmovies.utilities;
 
-import android.util.Log;
-
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.models.Review;
 import com.example.android.popularmovies.models.Trailer;
@@ -47,8 +45,6 @@ public final class TMDbJsonUtils {
      */
     public static Movie[] getMoviesFromJson(String jsonString) throws JSONException {
 
-        Log.d(LOG_TAG, jsonString);
-
         final String TMDB_MOVIE_ID = "id";
         final String TMDB_POSTER_PATH = "poster_path";
         final String TMDB_OVERVIEW = "overview";
@@ -60,8 +56,6 @@ public final class TMDbJsonUtils {
 
         JSONObject moviesJson = new JSONObject(jsonString);
         JSONArray moviesJsonArray = moviesJson.getJSONArray("results");
-
-        Log.v(LOG_TAG, "Number of movies: " + moviesJsonArray.length());
 
         parsedMovies = new Movie[moviesJsonArray.length()];
 
@@ -85,12 +79,6 @@ public final class TMDbJsonUtils {
             voteAverage = movie.getDouble(TMDB_VOTE_AVERAGE);
 
             parsedMovies[i] = new Movie(movieID, posterPath, overview, releaseDate, title, voteAverage);
-
-            Log.v(LOG_TAG, parsedMovies[i].getMovieID() + " " +
-                    parsedMovies[i].getTitle() + " - " +
-                    parsedMovies[i].getReleaseDate()
-            );
-
         }
 
         return parsedMovies;
@@ -98,13 +86,12 @@ public final class TMDbJsonUtils {
 
     public static Movie getMovieFromJson(String jsonString) throws JSONException {
 
-        Log.d(LOG_TAG, jsonString);
-
         final String TMDB_MOVIE_ID = "id";
         final String TMDB_MOVIE_POSTER_PATH = "poster_path";
         final String TMDB_MOVIE_OVERVIEW = "overview";
         final String TMDB_MOVIE_RELEASE_DATE = "release_date";
         final String TMDB_MOVIE_TITLE = "title";
+        final String TMDB_MOVIE_RUNTIME = "runtime";
         final String TMDB_MOVIE_VOTE_AVERAGE = "vote_average";
 
 
@@ -135,6 +122,7 @@ public final class TMDbJsonUtils {
         String movieReleaseDate;
         String movieTitle;
         double movieVoteAverage;
+        int movieRuntime;
 
         movieID = movieJson.getInt(TMDB_MOVIE_ID);
         moviePosterPath = movieJson.getString(TMDB_MOVIE_POSTER_PATH);
@@ -142,12 +130,13 @@ public final class TMDbJsonUtils {
         movieReleaseDate = movieJson.getString(TMDB_MOVIE_RELEASE_DATE);
         movieTitle = movieJson.getString(TMDB_MOVIE_TITLE);
         movieVoteAverage = movieJson.getDouble(TMDB_MOVIE_VOTE_AVERAGE);
+        movieRuntime = movieJson.getInt(TMDB_MOVIE_RUNTIME);
 
         movie = new Movie(
                 movieID, moviePosterPath, movieOverview, movieReleaseDate,
                 movieTitle, movieVoteAverage
         );
-        Log.d(LOG_TAG, "Movie intantiated");
+        movie.setRuntime(movieRuntime);
 
         String trailerID;
         String trailerName;
@@ -172,7 +161,6 @@ public final class TMDbJsonUtils {
             );
         }
         movie.setTrailerArray(trailerArray);
-        Log.d(LOG_TAG, "Trailers added to movie");
 
         //Add reviews to movie object
         Review[] reviewArray = new Review[reviewJSONArray.length()];
@@ -189,7 +177,6 @@ public final class TMDbJsonUtils {
             reviewArray[i] = new Review(reviewID, author, content, reviewURL);
         }
         movie.setmReviewArray(reviewArray);
-        Log.d(LOG_TAG, "Reviews added to movie");
 
         return movie;
     }

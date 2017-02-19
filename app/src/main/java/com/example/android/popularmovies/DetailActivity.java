@@ -27,13 +27,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
+import com.example.android.popularmovies.adapters.ReviewAdapter;
 import com.example.android.popularmovies.adapters.TrailerAdapter;
 import com.example.android.popularmovies.asyncTasks.AsyncTaskListener;
-import com.example.android.popularmovies.asyncTasks.MovieQueryTask;
+import com.example.android.popularmovies.asyncTasks.MovieDetailsQueryTask;
 import com.example.android.popularmovies.models.Movie;
+import com.example.android.popularmovies.models.Review;
 import com.example.android.popularmovies.models.Trailer;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
@@ -46,12 +51,28 @@ import java.util.Locale;
  */
 public class DetailActivity
         extends AppCompatActivity
-        implements TrailerAdapter.TrailerAdapterOnClickHandler {
+        implements TrailerAdapter.TrailerAdapterOnClickHandler,
+        ReviewAdapter.ReviewAdapterOnClickHandler {
 
     private static final String LOG_TAG = DetailActivity.class.getSimpleName();
 
+    private ProgressBar mLoadingIndicator;
+
+    private TextView mErrorMessageDisplay;
+
+    private ScrollView mScrollViewMovieData;
+
+    private ImageView mSmallPoster;
+    private TextView mOverview;
+    private TextView mReleaseDate;
+    private TextView mRuntime;
+    private TextView mVoteAverage;
+
+    private RecyclerView mRecyclerViewTrailers;
     private TrailerAdapter mTrailerAdapter;
 
+    private RecyclerView mRecyclerViewReviews;
+    private ReviewAdapter mReviewAdapter;
 
     /**
      * Sets up the activity with data passed through the Intent.
@@ -61,54 +82,69 @@ public class DetailActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Log.v(LOG_TAG, "Creating " + this.toString());
-
         setContentView(R.layout.activity_detail);
 
-        ImageView mSmallPoster = (ImageView) findViewById(R.id.iv_small_poster);
-        TextView mTitle = (TextView) findViewById(R.id.tv_title);
-        TextView mOverview = (TextView) findViewById(R.id.tv_overview);
-        TextView mReleaseDate = (TextView) findViewById(R.id.tv_release_date);
-        TextView mVoteAverage = (TextView) findViewById(R.id.tv_vote_average);
+        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message);
+        mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
+
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
+
+        mScrollViewMovieData = (ScrollView) findViewById(R.id.sv_movie_data);
+
+        mSmallPoster = (ImageView) findViewById(R.id.iv_small_poster);
+        mOverview = (TextView) findViewById(R.id.tv_overview);
+        mReleaseDate = (TextView) findViewById(R.id.tv_release_date);
+        mRuntime = (TextView) findViewById(R.id.tv_runtime);
+        mVoteAverage = (TextView) findViewById(R.id.tv_vote_average);
 
         //Use RecyclerView for trailers
-        RecyclerView recyclerViewTrailers = (RecyclerView) findViewById(R.id.rv_trailers);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recyclerViewTrailers.setHasFixedSize(true);
-        recyclerViewTrailers.setLayoutManager(layoutManager);
+        mRecyclerViewTrailers = (RecyclerView) findViewById(R.id.rv_trailers);
+        LinearLayoutManager layoutManager =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mRecyclerViewTrailers.setHasFixedSize(true);
+        mRecyclerViewTrailers.setLayoutManager(layoutManager);
+
         mTrailerAdapter = new TrailerAdapter(this, this);
-        recyclerViewTrailers.setAdapter(mTrailerAdapter);
+        mRecyclerViewTrailers.setAdapter(mTrailerAdapter);
 
-        Intent intent = getIntent();
-        if (intent != null) {
-            if (intent.hasExtra(getString(R.string.movie_key))) {
-                Movie movie = (Movie) intent.getSerializableExtra(getString(R.string.movie_key));
 
-                String posterURLString =
-                        NetworkUtils.IMDB_IMAGE_BASE_URL +
-                                NetworkUtils.IMDB_IMAGE_SMALL_SIZE +
-                                movie.getPosterPath();
-                Log.d(LOG_TAG, "Small poster: " + posterURLString);
-                Picasso.with(this).load(posterURLString).into(mSmallPoster);
+        //Use RecyclerView for reviews
+        mRecyclerViewReviews = (RecyclerView) findViewById(R.id.rv_reviews);
+        LinearLayoutManager layoutManager1 =
+                new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        mRecyclerViewReviews.setHasFixedSize(true);
+        mRecyclerViewReviews.setLayoutManager(layoutManager1);
 
-                mTitle.setText(movie.getTitle());
-                mOverview.setText(movie.getOverview());
-                //Show only the year of the release date
-                mReleaseDate.setText(movie.getReleaseDate().substring(0, 4));
-                mVoteAverage.setText(
-                        String.format(
-                                Locale.US,
-                                getString(R.string.vote_average_by_ten),
-                                movie.getVoteAverage())
-                );
+        mReviewAdapter = new ReviewAdapter(this, this);
+        mRecyclerViewReviews.setAdapter(mReviewAdapter);
 
-                this.setTitle(movie.getTitle());
 
-                URL url = NetworkUtils.buildMovieURL(String.valueOf(movie.getMovieID()));
-                new MovieQueryTask(new MovieQueryTaskListener()).execute(url);
+        //Retreive movie data from database
+        queryMovieDatabase();
+    }
+
+    private void queryMovieDatabase() {
+        if (NetworkUtils.isOnline()) {
+            Intent intent = getIntent();
+            if (intent != null) {
+                if (intent.hasExtra(getString(R.string.movie_key))) {
+                    int movieID = (int) intent.getIntExtra(getString(R.string.movie_key), -1);
+                    if (movieID == -1) {
+                        //TODO Is that the appropriate exception type?
+                        throw new IllegalArgumentException(LOG_TAG + ": movie ID must not be -1.");
+                    }
+                    URL url = NetworkUtils.buildMovieURL(String.valueOf(movieID));
+                    new MovieDetailsQueryTask(new MovieQueryTaskListener()).execute(url);
+                } else {
+                    //TODO Is that the appropriate exception type?
+                    throw new IllegalArgumentException(LOG_TAG + ": No movie ID in Intent.");
+                }
             }
+        } else {
+            mScrollViewMovieData.setVisibility(View.INVISIBLE);
+            mErrorMessageDisplay.setVisibility(View.VISIBLE);
         }
+
     }
 
     @Override
@@ -122,9 +158,15 @@ public class DetailActivity
         );
     }
 
+    @Override
+    public void onClick(Review review) {
+        Log.d(LOG_TAG, "Clicked on a review item");
+    }
+
+
     /**
      * Listener executes onPreExecute and onPostExecute functionality of corresponding
-     * MoviesQueryTask.
+     * MovieDetailsQueryTask.
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
@@ -133,18 +175,59 @@ public class DetailActivity
         @Override
         public void onTaskComplete(Movie movie) {
 
-            Log.d(LOG_TAG, MovieQueryTaskListener.class.getSimpleName() +
-                    ": Movie data downloaded for movie + " + movie.getMovieID());
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
 
-            mTrailerAdapter.setTrailerArray(movie.getTrailerArray());
+            if (movie != null) {
+                mScrollViewMovieData.setVisibility(View.VISIBLE);
+                mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+
+                //Set movie title for activity
+                DetailActivity.this.setTitle(movie.getTitle());
+
+                //Set the poster (small size)
+                String posterURLString =
+                        NetworkUtils.IMDB_IMAGE_BASE_URL +
+                                NetworkUtils.IMDB_IMAGE_SMALL_SIZE +
+                                movie.getPosterPath();
+                Log.d(LOG_TAG, "Small poster: " + posterURLString);
+                Picasso.with(DetailActivity.this).load(posterURLString).into(mSmallPoster);
+
+                //Set the summary
+                mOverview.setText(movie.getOverview());
+
+                //Show only the year of the release date
+                mReleaseDate.setText(movie.getReleaseDate().substring(0, 4));
+
+                //Set the runtime
+                mRuntime.setText(String.format(Locale.US,
+                        getString(R.string.runtime), movie.getRuntime())
+                );
+
+                //Set the average vote
+                mVoteAverage.setText(
+                        String.format(
+                                Locale.US,
+                                getString(R.string.vote_average_by_ten),
+                                movie.getVoteAverage())
+                );
+
+                //TODO What if movie does not have trailers ?
+                mTrailerAdapter.setTrailerArray(movie.getTrailerArray());
+
+                //TODO What if movie does not have reviews ?
+                mReviewAdapter.setReviewArray(movie.getmReviewArray());
+
+            } else {
+                mScrollViewMovieData.setVisibility(View.INVISIBLE);
+                mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            }
+
         }
 
         @Override
         public void beforeTaskExecution() {
-
-            Log.d(LOG_TAG, MovieQueryTaskListener.class.getSimpleName() +
-                    ": About to start movie data download");
-
+            mScrollViewMovieData.setVisibility(View.INVISIBLE);
+            mLoadingIndicator.setVisibility(View.VISIBLE);
         }
 
     }

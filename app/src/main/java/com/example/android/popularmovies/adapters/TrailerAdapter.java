@@ -14,7 +14,7 @@ import com.example.android.popularmovies.models.Trailer;
 public class TrailerAdapter
         extends RecyclerView.Adapter<TrailerAdapter.TrailerAdapterViewHolder> {
 
-    private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
+    private static final String LOG_TAG = TrailerAdapter.class.getSimpleName();
 
     private Trailer[] mTrailerArray;
 
@@ -23,8 +23,8 @@ public class TrailerAdapter
     private TrailerAdapter.TrailerAdapterOnClickHandler mClickHandler;
 
     /**
-     * @param context      - the Activity using the MovieAdapter
-     * @param clickHandler - the Activity implementing the MovieAdapterOnClickHandler
+     * @param context      - the Activity using the TrailerAdapter
+     * @param clickHandler - the Activity implementing the TrailerAdapterOnClickHandler
      */
     public TrailerAdapter(Context context, TrailerAdapter.TrailerAdapterOnClickHandler clickHandler) {
         this.mContext = context;
@@ -32,7 +32,7 @@ public class TrailerAdapter
     }
 
     /**
-     * Interface for onClick(String) method.
+     * Interface for onClick method.
      */
     public interface TrailerAdapterOnClickHandler {
         void onClick(Trailer trailer);
@@ -49,12 +49,12 @@ public class TrailerAdapter
         private TextView mTVTrailer;
 
         /**
-         * @param view - view holder at which MovieAdapterViewHolder is registered as listener.
+         * @param itemView - view holder at which MovieAdapterViewHolder is registered as listener.
          */
-        public TrailerAdapterViewHolder(View view) {
-            super(view);
-            mTVTrailer = (TextView) view.findViewById(R.id.tv_trailer);
-            view.setOnClickListener(this);
+        public TrailerAdapterViewHolder(View itemView) {
+            super(itemView);
+            mTVTrailer = (TextView) itemView.findViewById(R.id.tv_trailer);
+            itemView.setOnClickListener(this);
         }
 
         /**
@@ -88,8 +88,8 @@ public class TrailerAdapter
         return mTrailerArray.length;
     }
 
-    public void setTrailerArray(Trailer[] trailerArray) {
-        mTrailerArray = trailerArray;
+    public void setTrailerArray(Trailer[] newTrailerArray) {
+        mTrailerArray = newTrailerArray;
         notifyDataSetChanged();
     }
 }
