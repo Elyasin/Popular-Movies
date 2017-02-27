@@ -21,7 +21,9 @@
 
 package com.example.android.popularmovies.asyncTasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
@@ -41,7 +43,10 @@ public class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
 
     private AsyncTaskListener<Movie[]> mListener;
 
-    public MoviesQueryTask(AsyncTaskListener<Movie[]> listener) {
+    private Context mContext;
+
+    public MoviesQueryTask(Context context, AsyncTaskListener<Movie[]> listener) {
+        this.mContext = context;
         this.mListener = listener;
     }
 
@@ -57,20 +62,24 @@ public class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
     /**
      * Retreival of movie data in form of an Movie[] array.
      *
-     * @param urls - Contains one URL at position 0.
+     * @param params - Contains one URL at position 0.
      * @return Movie[] array containing all retrieved movies information (only page 1).
      */
     @Override
-    protected Movie[] doInBackground(URL... urls) {
-        URL url = urls[0];
+    protected Movie[] doInBackground(URL... params) {
+        URL url = params[0];
         Movie movieArray[] = null;
 
         try {
             String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
             movieArray = TMDbJsonUtils.getMoviesFromJson(responseStr);
+
+
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
+
+        Log.d(LOG_TAG, "Movie data downloaded");
 
         return movieArray;
     }

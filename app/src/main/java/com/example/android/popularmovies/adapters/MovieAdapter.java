@@ -22,6 +22,7 @@ package com.example.android.popularmovies.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import android.widget.ImageView;
 import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -120,8 +122,29 @@ public class MovieAdapter
      */
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
-        String posterURLString = NetworkUtils.IMDB_IMAGE_BASE_URL + NetworkUtils.IMDB_IMAGE_SIZE + mMovies[position].getPosterPath();
-        Picasso.with(mContext).load(posterURLString).into(holder.mPoster);
+        String posterURLString =
+                NetworkUtils.IMDB_IMAGE_BASE_URL + NetworkUtils.IMDB_IMAGE_SIZE +
+                        mMovies[position].getPosterPath();
+        boolean isFavorite = mMovies[holder.getAdapterPosition()].isFavorite();
+        if (isFavorite) {
+
+            Picasso.with(mContext)
+                    .load(posterURLString)
+                    .networkPolicy(NetworkPolicy.OFFLINE)
+                    .into(holder.mPoster);
+
+            Log.d(LOG_TAG, "Image loaded from cache");
+
+        } else {
+
+            Picasso.with(mContext)
+                    .load(posterURLString)
+                    .into(holder.mPoster);
+
+            Log.d(LOG_TAG, "Image loaded from server");
+
+        }
+
     }
 
     /**

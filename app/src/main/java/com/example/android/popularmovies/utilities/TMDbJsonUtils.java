@@ -134,9 +134,7 @@ public final class TMDbJsonUtils {
 
         movie = new Movie(
                 movieID, moviePosterPath, movieOverview, movieReleaseDate,
-                movieTitle, movieVoteAverage
-        );
-        movie.setRuntime(movieRuntime);
+                movieTitle, movieRuntime, movieVoteAverage);
 
         String trailerID;
         String trailerName;
@@ -176,7 +174,7 @@ public final class TMDbJsonUtils {
 
             reviewArray[i] = new Review(reviewID, author, content, reviewURL);
         }
-        movie.setmReviewArray(reviewArray);
+        movie.setReviewArray(reviewArray);
 
         return movie;
     }

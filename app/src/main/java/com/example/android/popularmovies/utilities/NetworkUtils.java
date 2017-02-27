@@ -23,6 +23,7 @@ package com.example.android.popularmovies.utilities;
 import android.net.Uri;
 
 import com.example.android.popularmovies.BuildConfig;
+import com.example.android.popularmovies.data.MovieContract;
 import com.example.android.popularmovies.models.Movie;
 
 import java.io.IOException;
@@ -118,6 +119,21 @@ public class NetworkUtils {
                 appendQueryParameter(TMDb_QUERY_APPEND_TO_RESPONSE_KEY, TMDb_QUERY_APPEND_TO_RESPONSE_VALUES).
                 build();
 
+
+        URL url = null;
+        try {
+            url = new URL(builtUri.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        return url;
+    }
+
+
+    public static URL buildFavoriteMoviesURL() {
+
+        Uri builtUri = MovieContract.MovieEntry.CONTENT_URI;
 
         URL url = null;
         try {

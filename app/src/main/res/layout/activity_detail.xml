@@ -118,12 +118,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                         tools:text="8.4/10" />
 
                     <TextView
+                        android:id="@+id/tv_is_favorite"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:contentDescription="@string/mark_as_favorite"
                         android:drawableLeft="@android:drawable/btn_star_big_off"
                         android:drawableStart="@android:drawable/btn_star_big_off"
                         android:gravity="center_vertical"
+                        android:onClick="onClickDeFavoriseMovie"
                         android:text="@string/mark_as_favorite"
                         android:textSize="12sp"
                         tools:text="@string/mark_as_favorite" />

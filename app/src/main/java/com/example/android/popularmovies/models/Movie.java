@@ -27,6 +27,7 @@ public class Movie implements Serializable {
 
     private int mMovieID;
     private String mPosterPath;
+    private byte[] mSmallPoster;
     private String mOverview;
     private String mReleaseDate;
     private String mTitle;
@@ -34,13 +35,30 @@ public class Movie implements Serializable {
     private double mVoteAverage;
     private Trailer[] mTrailersArray;
     private Review[] mReviewArray;
+    private boolean mFavorite;
 
-    public Movie(int movieID, String posterPath, String overview, String releaseDate, String title, double voteAverage) {
+    public Movie(int id) {
+        setMovieID(id);
+    }
+
+    public Movie(int movieID, String posterPath, String overview,
+                 String releaseDate, String title, double voteAverage) {
         setMovieID(movieID);
         setPosterPath(posterPath);
         setOverview(overview);
         setReleaseDate(releaseDate);
         setTitle(title);
+        setVoteAverage(voteAverage);
+    }
+
+    public Movie(int movieID, String posterPath, String overview,
+                 String releaseDate, String title, int runtime, double voteAverage) {
+        setMovieID(movieID);
+        setPosterPath(posterPath);
+        setOverview(overview);
+        setReleaseDate(releaseDate);
+        setTitle(title);
+        setRuntime(runtime);
         setVoteAverage(voteAverage);
     }
 
@@ -52,11 +70,11 @@ public class Movie implements Serializable {
         this.mTrailersArray = trailerArray;
     }
 
-    public Review[] getmReviewArray() {
+    public Review[] getReviewArray() {
         return mReviewArray;
     }
 
-    public void setmReviewArray(Review[] mReviewArray) {
+    public void setReviewArray(Review[] mReviewArray) {
         this.mReviewArray = mReviewArray;
     }
 
@@ -74,6 +92,14 @@ public class Movie implements Serializable {
 
     public void setPosterPath(String mPosterPath) {
         this.mPosterPath = mPosterPath;
+    }
+
+    public byte[] getSmallPoster() {
+        return mSmallPoster;
+    }
+
+    public void setSmallPoster(byte[] mSmallPoster) {
+        this.mSmallPoster = mSmallPoster;
     }
 
     public String getOverview() {
@@ -116,4 +142,15 @@ public class Movie implements Serializable {
         this.mRuntime = runtime;
     }
 
+    public boolean isFavorite() {
+        return mFavorite;
+    }
+
+    public void setFavorite(int mFavorite) {
+        this.mFavorite = (mFavorite == 0 ? false : true);
+    }
+
+    public void setFavorite(boolean mFavorite) {
+        this.mFavorite = mFavorite;
+    }
 }

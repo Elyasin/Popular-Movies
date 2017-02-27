@@ -23,6 +23,7 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -40,7 +41,9 @@ import android.widget.TextView;
 
 import com.example.android.popularmovies.adapters.MovieAdapter;
 import com.example.android.popularmovies.asyncTasks.AsyncTaskListener;
+import com.example.android.popularmovies.asyncTasks.MoviesLocalQueryTask;
 import com.example.android.popularmovies.asyncTasks.MoviesQueryTask;
+import com.example.android.popularmovies.data.MovieContract;
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 
@@ -55,6 +58,17 @@ public class MainActivity extends AppCompatActivity implements
         MovieAdapter.MovieAdapterOnClickHandler {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
+
+    // Projection and indices for movie details
+    public static final String[] MOVIES_PROJECTION = {
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_MOVIE_FAVORITE
+    };
+    public static final int INDEX_MOVIE_ID = 0;
+    public static final int INDEX_MOVIE_POSTER_PATH = 1;
+    public static final int INDEX_MOVIE_FAVORITE = 2;
 
 
     private MovieAdapter mMovieAdapter;
@@ -103,11 +117,16 @@ public class MainActivity extends AppCompatActivity implements
     private void queryMovieDatabase(boolean rated) {
         if (NetworkUtils.isOnline()) {
             URL url = NetworkUtils.buildMoviesURL(rated);
-            new MoviesQueryTask(new MoviesQueryTaskListener()).execute(url);
+            new MoviesQueryTask(this, new MoviesQueryTaskListener()).execute(url);
         } else {
             mRecyclerViewMovies.setVisibility(View.INVISIBLE);
             mErrorMessageDisplay.setVisibility(View.VISIBLE);
         }
+    }
+
+    private void queryLocalMovieDatabase() {
+        Uri uri = MovieContract.MovieEntry.CONTENT_URI;
+        new MoviesLocalQueryTask(this, new MoviesLocalQueryTaskListener()).execute(uri);
     }
 
     /**
@@ -124,11 +143,14 @@ public class MainActivity extends AppCompatActivity implements
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(false);
+            Log.d(LOG_TAG, "Display popular movies");
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(true);
+            Log.d(LOG_TAG, "Display top-rated movies");
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.favorite))) {
             this.setTitle(getString(R.string.favorite));
+            queryLocalMovieDatabase();
             Log.d(LOG_TAG, "Display Favorite movies");
         }
 
@@ -191,6 +213,29 @@ public class MainActivity extends AppCompatActivity implements
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
     public class MoviesQueryTaskListener implements AsyncTaskListener<Movie[]> {
+
+        @Override
+        public void onTaskComplete(Movie[] movieArray) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+
+            if (movieArray != null) {
+                mRecyclerViewMovies.setVisibility(View.VISIBLE);
+                mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+                mMovieAdapter.setMovieData(movieArray);
+            } else {
+                mRecyclerViewMovies.setVisibility(View.INVISIBLE);
+                mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            }
+        }
+
+        @Override
+        public void beforeTaskExecution() {
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    public class MoviesLocalQueryTaskListener implements AsyncTaskListener<Movie[]> {
 
         @Override
         public void onTaskComplete(Movie[] movieArray) {
