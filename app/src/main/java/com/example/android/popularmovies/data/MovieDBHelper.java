@@ -1,5 +1,25 @@
-package com.example.android.popularmovies.data;
+/**
+ * MIT License
+ * <p>
+ * Copyright (c) 2017 Elyasin Shaladi
+ * <p>
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+ * associated documentation files (the "Software"), to deal in the Software without restriction,
+ * including without limitation the rights to use, copy, modify, merge, publish, distribute,
+ * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * <p>
+ * The above copyright notice and this permission notice shall be included in all copies or
+ * substantial portions of the Software.
+ * <p>
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+ * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 
+package com.example.android.popularmovies.data;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -9,9 +29,13 @@ import com.example.android.popularmovies.data.MovieContract.MovieEntry;
 import com.example.android.popularmovies.data.MovieContract.ReviewEntry;
 import com.example.android.popularmovies.data.MovieContract.TrailerEntry;
 
+/**
+ * DBHelper for movie database. A movie has 0 or more trailers or reviews.
+ */
 public class MovieDBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "moviesMainDb.db";
+
 
     private static final int VERSION = 1;
 
@@ -19,8 +43,14 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, VERSION);
     }
 
+    /**
+     * The movie id is unique and referenced as foreign key by a trailer or review.
+     *
+     * @param db The SQLite database to manage.
+     */
     @Override
     public void onCreate(SQLiteDatabase db) {
+
 
         final String CREATE_MOVIE_TABLE = "CREATE TABLE IF NOT EXISTS " +
                 MovieEntry.TABLE_NAME + " (" +
@@ -31,11 +61,12 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieEntry.COLUMN_MOVIE_TITLE + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_MOVIE_RUNTIME + " INTEGER NOT NULL, " +
                 MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE + " REAL NOT NULL, " +
-                //TODO What to do with the BLOB ?
-                MovieEntry.COLUMN_MOVIE_POSTER + " BLOB , " +
+                MovieEntry.COLUMN_MOVIE_W92_POSTER + " BLOB , " +
+                MovieEntry.COLUMN_MOVIE_W185_POSTER + " BLOB , " +
                 MovieEntry.COLUMN_MOVIE_POSTER_PATH + " TEXT NOT NULL, " +
                 MovieEntry.COLUMN_MOVIE_FAVORITE + " INTEGER NOT NULL, " +
                 " UNIQUE (" + MovieEntry.COLUMN_MOVIE_ID + ") ON CONFLICT REPLACE);";
+
 
         final String CREATE_TRAILER_TABLE = "CREATE TABLE IF NOT EXISTS " +
                 TrailerEntry.TABLE_NAME + " (" +
@@ -49,6 +80,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 "FOREIGN KEY(" + TrailerEntry.COLUMN_MOVIE_ID + ") REFERENCES " +
                 MovieEntry.TABLE_NAME + "(" + MovieEntry.COLUMN_MOVIE_ID + ")" +
                 " UNIQUE (" + TrailerEntry.COLUMN_TRAILER_ID + ") ON CONFLICT REPLACE);";
+
 
         final String CREATE_REVIEW_TABLE = "CREATE TABLE IF NOT EXISTS " +
                 ReviewEntry.TABLE_NAME + " (" +

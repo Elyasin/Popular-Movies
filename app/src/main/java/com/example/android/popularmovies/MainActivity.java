@@ -50,7 +50,8 @@ import com.example.android.popularmovies.utilities.NetworkUtils;
 import java.net.URL;
 
 /**
- * Main activity displaying selectable movie posters in a grid (based on LinearLayout).
+ * {@link MainActivity} displaying selectable movie posters in a grid (based on LinearLayout).
+ * By default it displays Popular Movies selection.
  */
 
 public class MainActivity extends AppCompatActivity implements
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
 
-    // Projection and indices for movie details
+    // Projection and indices for movies
     public static final String[] MOVIES_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
             MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
@@ -72,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements
 
 
     private MovieAdapter mMovieAdapter;
-
     private RecyclerView mRecyclerViewMovies;
 
     private ProgressBar mLoadingIndicator;
@@ -82,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Sets up {@link MainActivity} and initially queries database.
      *
-     * @param savedInstanceState - Bundle of Activity
+     * @param savedInstanceState Bundle of Activity
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,15 +92,12 @@ public class MainActivity extends AppCompatActivity implements
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message);
         mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
 
-
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         mRecyclerViewMovies = (RecyclerView) findViewById(R.id.rv_movies);
-
         GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
         mRecyclerViewMovies.setHasFixedSize(true);
         mRecyclerViewMovies.setLayoutManager(layoutManager);
-
         mMovieAdapter = new MovieAdapter(this, this);
         mRecyclerViewMovies.setAdapter(mMovieAdapter);
 
@@ -109,8 +106,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * This method constructs the URL (using {@link NetworkUtils}) and fires off
-     * an AsyncTask to perform the GET request using our {@link MoviesQueryTask}
+     * Constructs the URL (using {@link NetworkUtils}) and fires off
+     * an AsyncTask to perform the GET request using our {@link MoviesQueryTask}.
+     * If there is no internet connection a message is displayed.
      *
      * @param rated - If true queries with top-rated URL, otherwise popular URL.
      */
@@ -124,18 +122,26 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
+
+    /**
+     * Fires off AsyncTask (see {@link MoviesLocalQueryTask}) to query
+     * {@link com.example.android.popularmovies.data.MovieContentProvider}
+     * for favorite movies.
+     */
     private void queryLocalMovieDatabase() {
         Uri uri = MovieContract.MovieEntry.CONTENT_URI;
         new MoviesLocalQueryTask(this, new MoviesLocalQueryTaskListener()).execute(uri);
     }
 
     /**
-     * Queries the movie database for selected item: popular or top-rated
+     * Queries the movie database for selected item: popular or top-rated or favorites
+     * The Favorites are from the local storage
+     * ({@link com.example.android.popularmovies.data.MovieContentProvider})
      *
-     * @param adapterView - The AdapterView were selection happened.
-     * @param view        - The view that was clicked (within the AdapterView).
-     * @param pos         - The position of the selected item.
-     * @param id          - Row id of selected item.
+     * @param adapterView The AdapterView were selection happened.
+     * @param view        The view that was clicked (within the AdapterView).
+     * @param pos         The position of the selected item.
+     * @param id          Row id of selected item.
      */
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
@@ -143,15 +149,21 @@ public class MainActivity extends AppCompatActivity implements
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(false);
+
             Log.d(LOG_TAG, "Display popular movies");
+
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(true);
+
             Log.d(LOG_TAG, "Display top-rated movies");
+
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.favorite))) {
             this.setTitle(getString(R.string.favorite));
             queryLocalMovieDatabase();
+
             Log.d(LOG_TAG, "Display Favorite movies");
+
         }
 
     }
@@ -169,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements
     /**
      * Shows details of a selected movie in a new Activity.
      *
-     * @param movie - The movie that was clicked on.
+     * @param movie The movie that was clicked on.
      */
     @Override
     public void onClick(Movie movie) {
@@ -182,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     /**
-     * Add a spinner with two options (popular and top-rated) to the menu.
+     * Add a spinner with three options (popular, top-rated and favorites) to the menu.
      *
      * @param menu - The menu in which our items are placed.
      * @return true to display the menu.
@@ -195,8 +207,10 @@ public class MainActivity extends AppCompatActivity implements
         //Find/Create the action bar spinner
         MenuItem item = menu.findItem(R.id.spinner);
         Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
         //Register MainActivity as listener
         spinner.setOnItemSelectedListener(this);
+
         //Set the spinner adapter
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
                 R.array.spinner_items, android.R.layout.simple_spinner_item);
@@ -207,13 +221,19 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
-     * Listener executes onPreExecute and onPostExecute functionality of corresponding
-     * MoviesQueryTask.
+     * Listener executed by onPreExecute and onPostExecute functionality of corresponding
+     * AsyncTasks (see {@link MoviesQueryTask} and {@link MoviesLocalQueryTask}).
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
     public class MoviesQueryTaskListener implements AsyncTaskListener<Movie[]> {
 
+        /**
+         * Executed in the corresponding onPostExecute method of the AsyncTask.
+         * Display result if there is any, otherwise display error message.
+         *
+         * @param movieArray Array of movies returned from the AsyncTask.
+         */
         @Override
         public void onTaskComplete(Movie[] movieArray) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -224,10 +244,14 @@ public class MainActivity extends AppCompatActivity implements
                 mMovieAdapter.setMovieData(movieArray);
             } else {
                 mRecyclerViewMovies.setVisibility(View.INVISIBLE);
+                mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
                 mErrorMessageDisplay.setVisibility(View.VISIBLE);
             }
         }
 
+        /**
+         * Executed in the corresponding onPreExecute method of the AsyncTask.
+         */
         @Override
         public void beforeTaskExecution() {
             mLoadingIndicator.setVisibility(View.VISIBLE);
@@ -235,8 +259,20 @@ public class MainActivity extends AppCompatActivity implements
 
     }
 
+    /**
+     * Listener executed by onPreExecute and onPostExecute functionality of corresponding
+     * AsyncTasks (see {@link MoviesQueryTask} and {@link MoviesLocalQueryTask}).
+     * <p>
+     * Suitable in order to access activity's members (views, adapter, etc.)
+     */
     public class MoviesLocalQueryTaskListener implements AsyncTaskListener<Movie[]> {
 
+        /**
+         * Executed in the corresponding onPostExecute method of the AsyncTask.
+         * Display result if there is any, otherwise display error message.
+         *
+         * @param movieArray Array of movies returned from the AsyncTask.
+         */
         @Override
         public void onTaskComplete(Movie[] movieArray) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
@@ -247,14 +283,19 @@ public class MainActivity extends AppCompatActivity implements
                 mMovieAdapter.setMovieData(movieArray);
             } else {
                 mRecyclerViewMovies.setVisibility(View.INVISIBLE);
+                mErrorMessageDisplay.setText(getString(R.string.no_favorites_in_list));
                 mErrorMessageDisplay.setVisibility(View.VISIBLE);
             }
         }
 
+        /**
+         * Executed in the corresponding onPreExecute method of the AsyncTask.
+         */
         @Override
         public void beforeTaskExecution() {
             mLoadingIndicator.setVisibility(View.VISIBLE);
         }
 
     }
+
 }

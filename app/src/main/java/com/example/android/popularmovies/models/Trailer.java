@@ -21,6 +21,9 @@
 
 package com.example.android.popularmovies.models;
 
+/**
+ * Represents a movie trailer.
+ */
 public class Trailer {
 
     private String trailerID;

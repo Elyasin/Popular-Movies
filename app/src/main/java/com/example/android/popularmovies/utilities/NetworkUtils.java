@@ -39,7 +39,7 @@ import java.util.Scanner;
  * The image URL string is made of the base URL, the image size and the poster string URL of a
  * Movie object.
  * <p>
- * Example for image in Main Activity:  IMDB_IMAGE_BASE_URL + IMDB_IMAGE_SIZE + movie.getPosterPath().
+ * Example for image in Main Activity:  IMDB_IMAGE_BASE_URL + IMDB_IMAGE_W185_SIZE + movie.getPosterPath().
  * <p>
  * The movie data from TMDb is made of the base URL, the sort option (popular or top-rated) and
  * the API key. Use the method @builtUri to build either of the possible query URLs.
@@ -52,15 +52,17 @@ public class NetworkUtils {
 
     private static final String LOG_TAG = NetworkUtils.class.getSimpleName();
 
+
     // Image URL components
     public final static String IMDB_IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
-    public final static String IMDB_IMAGE_SIZE = "w185";       // for main activity
-    public final static String IMDB_IMAGE_SMALL_SIZE = "w92";  // for detail activity
+    public final static String IMDB_IMAGE_W185_SIZE = "w185";       // for main activity
+    public final static String IMDB_IMAGE_W92_SIZE = "w92";         // for detail activity
 
     //TMDb URL components
     public final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/movie/";
     public final static String TMDb_popular = "popular";
     public final static String TMDb_top_rated = "top_rated";
+
     //trailers and reviews end point string must be preceded by a movie id
     //to form e.g. http://api.themoviedb.org/3/movie/{id}/videos?api_key=...
     public final static String TMDb_trailers = "videos";
@@ -77,9 +79,9 @@ public class NetworkUtils {
 
 
     /**
-     * Builds the URL used to query TMDb for list of movies.
+     * Builds the URL used to query TMDb for list of movies, either top-rated or popular
      *
-     * @param rated If True then query top-rated movies otherwise most popular movies.
+     * @param rated If True then return top-rated movies URL otherwise most popular movies.
      * @return The URL used to query the TMDb server.
      */
     public static URL buildMoviesURL(boolean rated) {
@@ -109,6 +111,12 @@ public class NetworkUtils {
         return url;
     }
 
+    /**
+     * Builds the URL used to query TMDb for the movie.
+     *
+     * @param movieId Movie id string
+     * @return The URL used to query for the TMDb movie.
+     */
     public static URL buildMovieURL(String movieId) {
 
         Uri builtUri = Uri.parse(TMDb_BASE_URL);
@@ -131,6 +139,12 @@ public class NetworkUtils {
     }
 
 
+    /**
+     * Builds the URL used to query {@link com.example.android.popularmovies.data.MovieContentProvider}
+     * for favorite movies.
+     *
+     * @return The URL used to query for the favorite movies.
+     */
     public static URL buildFavoriteMoviesURL() {
 
         Uri builtUri = MovieContract.MovieEntry.CONTENT_URI;

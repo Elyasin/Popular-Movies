@@ -18,6 +18,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.example.android.popularmovies.adapters;
 
 import android.content.Context;
@@ -35,20 +36,14 @@ import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 /**
- * MovieAdapter holds an array of Movie[] objects.
+ * MovieAdapter holds an array of Movie objects.
  * A MovieAdapter object must have a Context and a MovieAdapterOnClickHandler.
- * <p>
- * MovieAdapterOnClickHandler is an inner interface.
- * <p>
- * MovieAdapterViewHolder is an inner class, holding an ImageView for the movie poster. It
- * implements the OnClickListener interface, registers itself to the view as a listener and
- * delegates the onClick call the parent class' MovieAdapterOnClickHandler.
  */
-
 public class MovieAdapter
         extends RecyclerView.Adapter<MovieAdapter.MovieAdapterViewHolder> {
 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
+
 
     private Movie[] mMovies;
 
@@ -57,8 +52,11 @@ public class MovieAdapter
     private MovieAdapterOnClickHandler mClickHandler;
 
     /**
-     * @param context      - the Activity using the MovieAdapter
-     * @param clickHandler - the Activity implementing the MovieAdapterOnClickHandler
+     * Keeps references to context and listener. Listener are informed in onPreExecute and
+     * onPostExecute.
+     *
+     * @param context      The Activity using the MovieAdapter
+     * @param clickHandler The Activity implementing the MovieAdapterOnClickHandler
      */
     public MovieAdapter(Context context, MovieAdapterOnClickHandler clickHandler) {
         this.mContext = context;
@@ -66,46 +64,10 @@ public class MovieAdapter
     }
 
     /**
-     * Interface for onClick(Movie) method.
-     */
-    public interface MovieAdapterOnClickHandler {
-        void onClick(Movie movie);
-    }
-
-    /**
-     * ViewHolder for MovieAdapter implementing an OnClickListener.
-     * When a movie is clicked on the onClick is delegated to the MovieAdapterOnClickHandler.
+     * Inflate the movie grid item into the layout.
      *
-     * @see MovieAdapterOnClickHandler
-     */
-    public class MovieAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-
-        public ImageView mPoster;
-
-        /**
-         * @param view - view holder at which MovieAdapterViewHolder is registered as listener.
-         */
-        public MovieAdapterViewHolder(View view) {
-            super(view);
-            mPoster = (ImageView) view.findViewById(R.id.iv_poster);
-            view.setOnClickListener(this);
-        }
-
-        /**
-         * Delegate a click on a movie to the {@link MovieAdapterOnClickHandler}
-         *
-         * @param view - view holding the selected movie.
-         */
-        @Override
-        public void onClick(View view) {
-            Movie movie = mMovies[getAdapterPosition()];
-            mClickHandler.onClick(movie);
-        }
-    }
-
-    /**
-     * @param viewGroup - parent's view
-     * @param viewType  - type of the new View
+     * @param viewGroup The parent's view.
+     * @param viewType  The type of the new View.
      * @return MovieAdapterViewHolder with inflated movie item
      */
     public MovieAdapterViewHolder onCreateViewHolder(ViewGroup viewGroup, int viewType) {
@@ -116,18 +78,23 @@ public class MovieAdapter
     }
 
     /**
-     * @param holder   - MovieAdapterViewHolder which has a reference to ImageView that is to be
+     * Display the poster of the specified position (of the movie array).
+     *
+     * @param holder   MovieAdapterViewHolder which has a reference to ImageView that is to be
      *                 updated.
-     * @param position - Position of the movie in the Movie[] array.
+     * @param position Position of the movie (in the Movie[] array).
      */
     @Override
     public void onBindViewHolder(MovieAdapterViewHolder holder, int position) {
+
         String posterURLString =
-                NetworkUtils.IMDB_IMAGE_BASE_URL + NetworkUtils.IMDB_IMAGE_SIZE +
+                NetworkUtils.IMDB_IMAGE_BASE_URL + NetworkUtils.IMDB_IMAGE_W185_SIZE +
                         mMovies[position].getPosterPath();
         boolean isFavorite = mMovies[holder.getAdapterPosition()].isFavorite();
+
         if (isFavorite) {
 
+            //TODO get image from database
             Picasso.with(mContext)
                     .load(posterURLString)
                     .networkPolicy(NetworkPolicy.OFFLINE)
@@ -148,7 +115,9 @@ public class MovieAdapter
     }
 
     /**
-     * @return Total number of movies in Movie[] array.
+     * Number of movies managed in this adapter.
+     *
+     * @return Total number of movies in Movie array.
      */
     @Override
     public int getItemCount() {
@@ -159,10 +128,58 @@ public class MovieAdapter
     /**
      * Sets new movie data and notifies of data changes.
      *
-     * @param movieArray - Movie[] array to be set for this MovieAdapter.
+     * @param newMovieArray Movie array to be set for this MovieAdapter.
      */
-    public void setMovieData(Movie[] movieArray) {
-        mMovies = movieArray;
+    public void setMovieData(Movie[] newMovieArray) {
+        mMovies = newMovieArray;
         notifyDataSetChanged();
+    }
+
+    /**
+     * Interface for onClick(Movie) method.
+     */
+    public interface MovieAdapterOnClickHandler {
+
+        /**
+         * On click on a movie view item the corresponding movie object can be dealt with here.
+         *
+         * @param movie The movie object that was clicked on.
+         */
+        void onClick(Movie movie);
+    }
+
+    /**
+     * ViewHolder for MovieAdapter implementing an OnClickListener.
+     * When a movie is clicked on, the onClick is delegated to the MovieAdapterOnClickHandler.
+     *
+     * @see MovieAdapterOnClickHandler
+     */
+    public class MovieAdapterViewHolder
+            extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
+
+        public ImageView mPoster;
+
+        /**
+         * Poster reference and register as listener to the view holder.
+         *
+         * @param itemView - view holder at which MovieAdapterViewHolder is registered as listener.
+         */
+        public MovieAdapterViewHolder(View itemView) {
+            super(itemView);
+            mPoster = (ImageView) itemView.findViewById(R.id.iv_poster);
+            itemView.setOnClickListener(this);
+        }
+
+        /**
+         * Delegate a click on a movie to the {@link MovieAdapterOnClickHandler}
+         *
+         * @param view - view holding the selected movie.
+         */
+        @Override
+        public void onClick(View view) {
+            Movie movie = mMovies[getAdapterPosition()];
+            mClickHandler.onClick(movie);
+        }
     }
 }

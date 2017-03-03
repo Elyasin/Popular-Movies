@@ -9,6 +9,7 @@
 
 
     <string name="no_internet_access">You don\'t seem to have internet access. Cannot retrieve data.</string>
+    <string name="no_favorites_in_list">Your favorites list is empty.</string>
 
     <string-array name="spinner_items">
         <item>@string/popular</item>

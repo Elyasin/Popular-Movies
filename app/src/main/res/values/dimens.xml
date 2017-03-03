@@ -1,28 +1,24 @@
 <resources>
 
     <!-- Default screen margins, per the Android Design guidelines. -->
-    <dimen name="activity_horizontal_margin">16dp</dimen>
-    <dimen name="activity_vertical_margin">16dp</dimen>
 
     <dimen name="error_message_text_size">22sp</dimen>
     <dimen name="progress_bar_layout_width">42dp</dimen>
     <dimen name="progress_bar_layout_height">42dp</dimen>
 
     <dimen name="title_padding">20dp</dimen>
-    <dimen name="title_text_size">40sp</dimen>
     <dimen name="linear_layout_margin">7dp</dimen>
     <dimen name="linear_layout_margin_left">15dp</dimen>
     <dimen name="linear_layout_margin_bottom">7dp</dimen>
     <dimen name="release_date_text_size">30sp</dimen>
     <dimen name="runtime_text_size">25sp</dimen>
     <dimen name="vote_average_text_size">16sp</dimen>
-    <dimen name="detail_rv_layout_margin">15dp</dimen>
     <dimen name="trailer_title_size">16sp</dimen>
     <dimen name="trailer_text_size">14sp</dimen>
-    <dimen name="btn_star_width">45dp</dimen>
-    <dimen name="btn_star_height">30dp</dimen>
     <dimen name="review_title_size">16sp</dimen>
     <dimen name="review_text_size">14sp</dimen>
     <dimen name="review_author_text_size">14sp</dimen>
+    <dimen name="empty_trailers_message_text_size">22sp</dimen>
+    <dimen name="empty_reviews_message_text_size">22sp</dimen>
 
 </resources>

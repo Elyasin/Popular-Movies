@@ -18,6 +18,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.example.android.popularmovies.utilities;
 
 import com.example.android.popularmovies.models.Movie;
@@ -29,7 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
- * Utility class to convert Json string into a Movie[] array
+ * Utility class to convert Json strings into a Movie object or array.
  */
 public final class TMDbJsonUtils {
 
@@ -39,9 +40,9 @@ public final class TMDbJsonUtils {
     /**
      * Helper function to transform Json result into Movie[] array.
      *
-     * @param jsonString - Json string as returned by the TMDb queries.
+     * @param jsonString Json string as returned by the TMDb queries.
      * @return Movie[] array containing all movies from Json string
-     * @throws JSONException - Generic Json exception.
+     * @throws JSONException Generic Json exception.
      */
     public static Movie[] getMoviesFromJson(String jsonString) throws JSONException {
 
@@ -78,12 +79,20 @@ public final class TMDbJsonUtils {
             title = movie.getString(TMDB_TITLE);
             voteAverage = movie.getDouble(TMDB_VOTE_AVERAGE);
 
-            parsedMovies[i] = new Movie(movieID, posterPath, overview, releaseDate, title, voteAverage);
+            parsedMovies[i] = new Movie(movieID, posterPath, overview, releaseDate,
+                    title, 0, voteAverage, null, 0);
         }
 
         return parsedMovies;
     }
 
+    /**
+     * Helper function to transform Json result into Movie object.
+     *
+     * @param jsonString Json string as returned by the TMDb queries.
+     * @return Movie object containing details, trailers and reviews.
+     * @throws JSONException Generic Json exception.
+     */
     public static Movie getMovieFromJson(String jsonString) throws JSONException {
 
         final String TMDB_MOVIE_ID = "id";
@@ -93,7 +102,6 @@ public final class TMDbJsonUtils {
         final String TMDB_MOVIE_TITLE = "title";
         final String TMDB_MOVIE_RUNTIME = "runtime";
         final String TMDB_MOVIE_VOTE_AVERAGE = "vote_average";
-
 
         final String TMDB_VIDEO_ID = "id";
         final String TMDB_VIDEO_KEY = "key";
@@ -134,7 +142,7 @@ public final class TMDbJsonUtils {
 
         movie = new Movie(
                 movieID, moviePosterPath, movieOverview, movieReleaseDate,
-                movieTitle, movieRuntime, movieVoteAverage);
+                movieTitle, movieRuntime, movieVoteAverage, null, 0);
 
         String trailerID;
         String trailerName;

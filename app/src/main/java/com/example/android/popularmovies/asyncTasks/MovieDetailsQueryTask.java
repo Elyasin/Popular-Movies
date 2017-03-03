@@ -104,15 +104,17 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
                 "movie_id=?", new String[]{movieIDString}, null);
 
         if (movieCursor != null && movieCursor.moveToFirst()) {
-            movie = new Movie(movieID);
-            movie.setTitle(movieCursor.getString(INDEX_MOVIE_TITLE));
-            movie.setOverview(movieCursor.getString(INDEX_MOVIE_OVERVIEW));
-            movie.setReleaseDate(movieCursor.getString(INDEX_MOVIE_RELEASE_DATE));
-            movie.setRuntime(movieCursor.getInt(INDEX_MOVIE_RUNTIME));
-            movie.setVoteAverage(movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE));
-            movie.setSmallPoster(movieCursor.getBlob(INDEX_MOVIE_POSTER));
-            movie.setPosterPath(movieCursor.getString(INDEX_MOVIE_POSTER_PATH));
-            movie.setFavorite(movieCursor.getInt(INDEX_MOVIE_FAVORITE));
+            movie = new Movie(movieID,
+                    movieCursor.getString(INDEX_MOVIE_POSTER_PATH),
+                    movieCursor.getString(INDEX_MOVIE_OVERVIEW),
+                    movieCursor.getString(INDEX_MOVIE_RELEASE_DATE),
+                    movieCursor.getString(INDEX_MOVIE_TITLE),
+                    movieCursor.getInt(INDEX_MOVIE_RUNTIME),
+                    movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE),
+                    movieCursor.getBlob(INDEX_MOVIE_POSTER),
+                    movieCursor.getInt(INDEX_MOVIE_FAVORITE)
+            );
+
 
             //Retrieve trailers
             Uri trailerUri = MovieContract.TrailerEntry.CONTENT_URI.buildUpon().

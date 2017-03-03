@@ -40,12 +40,14 @@ public class MoviesLocalQueryTask extends AsyncTask<Uri, Void, Movie[]> {
         Cursor cursor = this.mContext.getContentResolver().query(
                 uri, MOVIES_PROJECTION, null, null, null);
 
-        if (cursor != null) {
+        if (cursor != null && cursor.getCount() > 0) {
             movieArray = new Movie[cursor.getCount()];
             while (cursor.moveToNext()) {
-                Movie movie = new Movie(Integer.valueOf(cursor.getString(INDEX_MOVIE_ID)));
-                movie.setPosterPath(cursor.getString(INDEX_MOVIE_POSTER_PATH));
-                movie.setFavorite(cursor.getInt(INDEX_MOVIE_FAVORITE));
+                Movie movie = new Movie(
+                        Integer.valueOf(cursor.getString(INDEX_MOVIE_ID)),
+                        cursor.getString(INDEX_MOVIE_POSTER_PATH),
+                        cursor.getInt(INDEX_MOVIE_FAVORITE)
+                );
 
                 movieArray[cursor.getPosition()] = movie;
             }

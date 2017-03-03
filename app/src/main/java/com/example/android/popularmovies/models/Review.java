@@ -21,6 +21,9 @@
 
 package com.example.android.popularmovies.models;
 
+/**
+ * Represents a movie review.
+ */
 public class Review {
 
     private String reviewID;

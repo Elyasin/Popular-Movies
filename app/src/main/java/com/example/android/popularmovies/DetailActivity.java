@@ -18,6 +18,7 @@
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+
 package com.example.android.popularmovies;
 
 import android.content.Intent;
@@ -29,6 +30,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -50,7 +52,8 @@ import com.squareup.picasso.Picasso;
 import java.util.Locale;
 
 /**
- * {@link DetailActivity} displaying information about a selected movie.
+ * {@link DetailActivity} displaying detailed information about a selected movie.
+ * A movie can be added to favorites.
  */
 public class DetailActivity
         extends AppCompatActivity
@@ -60,10 +63,12 @@ public class DetailActivity
 
     private static final String LOG_TAG = DetailActivity.class.getSimpleName();
 
+    //The main top level views
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
     private ScrollView mScrollViewMovieData;
 
+    //View details about a movie
     private ImageView mIVSmallPoster;
     private TextView mTVOverview;
     private TextView mTVReleaseDate;
@@ -71,20 +76,25 @@ public class DetailActivity
     private TextView mTVVoteAverage;
     private TextView mTVIsFavorite;
 
+    //Trailers of a movie
+    private LinearLayout mLLTrailers;
     private RecyclerView mRVTrailers;
     private TrailerAdapter mTrailerAdapter;
+    private TextView mTVTrailersEmptyView;
 
+    //Reviews of a movie (only first page is shown if there is any)
+    private LinearLayout mLLReviews;
     private RecyclerView mRVReviews;
     private ReviewAdapter mReviewAdapter;
+    private TextView mTVReviewsEmptyView;
 
     private Movie mMovie;
 
-    private boolean mAddToFavorites;
 
     // Projection and indices for movie details
     public static final String[] MOVIE_DETAIL_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
-            MovieContract.MovieEntry.COLUMN_MOVIE_POSTER,
+            MovieContract.MovieEntry.COLUMN_MOVIE_W92_POSTER,
             MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
             MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE,
@@ -103,6 +113,7 @@ public class DetailActivity
     public static final int INDEX_MOVIE_VOTE_AVERAGE = 7;
     public static final int INDEX_MOVIE_FAVORITE = 8;
 
+
     //Projection and indices for trailers
     public static final String[] TRAILERS_PROJECTION = {
             MovieContract.TrailerEntry.COLUMN_TRAILER_ID,
@@ -116,6 +127,7 @@ public class DetailActivity
     public static final int INDEX_TRAILER_NAME = 2;
     public static final int INDEX_TRAILER_SITE = 3;
     public static final int INDEX_TRAILER_TYPE = 4;
+
 
     //Projection and indices for reviews
     public static final String[] REVIEWS_PROJECTION = {
@@ -132,21 +144,20 @@ public class DetailActivity
     /**
      * Sets up the activity with data passed through the Intent.
      *
-     * @param savedInstanceState - Bundle of Activity
+     * @param savedInstanceState Bundle of Activity
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        //Top-level main views
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message);
         mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
-
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-
         mScrollViewMovieData = (ScrollView) findViewById(R.id.sv_movie_data);
 
-
+        //Views for details
         mIVSmallPoster = (ImageView) findViewById(R.id.iv_small_poster);
         mTVOverview = (TextView) findViewById(R.id.tv_overview);
         mTVReleaseDate = (TextView) findViewById(R.id.tv_release_date);
@@ -155,21 +166,25 @@ public class DetailActivity
         mTVIsFavorite = (TextView) findViewById(R.id.tv_is_favorite);
 
         //Use RecyclerView for trailers
+        mLLTrailers = (LinearLayout) findViewById(R.id.ll_trailers);
         mRVTrailers = (RecyclerView) findViewById(R.id.rv_trailers);
-        LinearLayoutManager layoutManager =
+        mTVTrailersEmptyView = (TextView) findViewById(R.id.tv_empty_trailers_view);
+        LinearLayoutManager trailersLayoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRVTrailers.setHasFixedSize(true);
-        mRVTrailers.setLayoutManager(layoutManager);
+        mRVTrailers.setLayoutManager(trailersLayoutManager);
         mTrailerAdapter = new TrailerAdapter(this, this);
         mRVTrailers.setAdapter(mTrailerAdapter);
 
 
         //Use RecyclerView for reviews
+        mLLReviews = (LinearLayout) findViewById(R.id.ll_reviews);
         mRVReviews = (RecyclerView) findViewById(R.id.rv_reviews);
-        LinearLayoutManager layoutManager1 =
+        mTVReviewsEmptyView = (TextView) findViewById(R.id.tv_empty_reviews_view);
+        LinearLayoutManager reviewsLayoutManager =
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRVReviews.setHasFixedSize(true);
-        mRVReviews.setLayoutManager(layoutManager1);
+        mRVReviews.setLayoutManager(reviewsLayoutManager);
         mReviewAdapter = new ReviewAdapter(this, this);
         mRVReviews.setAdapter(mReviewAdapter);
 
@@ -178,14 +193,18 @@ public class DetailActivity
         queryMovieDatabase();
     }
 
+    /**
+     * Loads the movie details using {@link MovieDetailsQueryTask}
+     */
     private void queryMovieDatabase() {
 
         Intent intent = getIntent();
         if (intent != null) {
 
+            //Movie ID must be passed to Intent, otherwise throw exception
             int movieID = (int) intent.getIntExtra(getString(R.string.movie_key), -1);
             if (movieID == -1) {
-                throw new IllegalArgumentException(LOG_TAG + ": movie ID must not be -1.");
+                throw new IllegalArgumentException(LOG_TAG + ": No movie selected");
             }
             //Load the data
             new MovieDetailsQueryTask(this, new MovieDetailsQueryTaskListener()).execute(movieID);
@@ -193,6 +212,11 @@ public class DetailActivity
 
     }
 
+    /**
+     * Starts intent with the URL for the trailer.
+     *
+     * @param trailer The trailer that was clicked on contains the Youtube key.
+     */
     @Override
     public void onClick(Trailer trailer) {
 
@@ -204,24 +228,30 @@ public class DetailActivity
         );
     }
 
+    /**
+     * TODO When clicked on a review....
+     *
+     * @param review The review that was clicked on.
+     */
     @Override
     public void onClick(Review review) {
         Log.d(LOG_TAG, "Clicked on a review item");
     }
 
 
-    public void onClickDeFavoriseMovie(View view) {
-        Log.d(LOG_TAG, "Adding/Removing movie: " + mMovie.getMovieID());
-
-        if (mMovie.getMovieID() == -1) {
-            Log.d(LOG_TAG, "No movie id");
-            return;
-        }
-
+    /**
+     * If the movie is in the favorite list, remove it using {@link MovieRemoveTask}.
+     * Otherwise add it to favorites using {@link MovieInsertTask}
+     *
+     * @param view The view that was clicked on
+     */
+    public void onClickAddToOrRemoveFromFavorites(View view) {
 
         if (mMovie.isFavorite()) {
+            Log.d(LOG_TAG, "Removing movie: " + mMovie.getMovieID());
             new MovieRemoveTask(this, new MovieRemoveTaskListener()).execute(mMovie);
         } else {
+            Log.d(LOG_TAG, "Adding movie: " + mMovie.getMovieID());
             new MovieInsertTask(this, new MovieInsertTaskListener()).execute(mMovie);
         }
 
@@ -229,8 +259,8 @@ public class DetailActivity
 
 
     /**
-     * Listener executes onPreExecute and onPostExecute functionality of corresponding
-     * MovieDetailsQueryTask.
+     * Listener executed by onPreExecute and onPostExecute functionality of corresponding
+     * {@link MovieDetailsQueryTask}.
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
@@ -239,6 +269,11 @@ public class DetailActivity
         private final String LOG_TAG = MovieDetailsQueryTaskListener.class.getSimpleName();
 
 
+        /**
+         * If movie was retrieved display the details. Otherwise display error message.
+         *
+         * @param movie The movie that was retrieved.
+         */
         @Override
         public void onTaskComplete(final Movie movie) {
 
@@ -251,14 +286,14 @@ public class DetailActivity
                 //Set movie title for activity
                 DetailActivity.this.setTitle(movie.getTitle());
 
-                //Set the poster (small size)
-                //byte[] posterByteArray = movie.getSmallPoster();
-                //Bitmap posterBitmap = BitmapFactory.decodeByteArray(posterByteArray, 0, posterByteArray.length);
-                //mIVSmallPoster.setImageBitmap(posterBitmap);
+                //If movie is in the favorites, display poster from cache.
+                //Otherwise display poster from "internet".
+                //Set the favorites button accordingly
                 String posterURLString =
                         NetworkUtils.IMDB_IMAGE_BASE_URL +
-                                NetworkUtils.IMDB_IMAGE_SMALL_SIZE +
+                                NetworkUtils.IMDB_IMAGE_W92_SIZE +
                                 movie.getPosterPath();
+
                 if (movie.isFavorite()) {
 
                     Picasso.with(DetailActivity.this)
@@ -269,7 +304,7 @@ public class DetailActivity
                     mTVIsFavorite.setText(getString(R.string.remove_from_favorite));
                     mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_on, 0, 0, 0);
 
-                    Log.d(LOG_TAG, "Image (hopefully) loaded from cache");
+                    Log.d(LOG_TAG, "Image loaded from cache");
 
                 } else {
 
@@ -303,11 +338,25 @@ public class DetailActivity
                                 movie.getVoteAverage())
                 );
 
-                //TODO What if movie does not have trailers ?
-                mTrailerAdapter.setTrailerArray(movie.getTrailerArray());
 
-                //TODO What if movie does not have reviews ?
+                mTrailerAdapter.setTrailerArray(movie.getTrailerArray());
+                if (mTrailerAdapter.getItemCount() == 0) {
+                    mLLTrailers.setVisibility(View.GONE);
+                    mTVTrailersEmptyView.setVisibility(View.VISIBLE);
+                } else {
+                    mLLTrailers.setVisibility(View.VISIBLE);
+                    mTVTrailersEmptyView.setVisibility(View.GONE);
+                }
+
+
                 mReviewAdapter.setReviewArray(movie.getReviewArray());
+                if (mReviewAdapter.getItemCount() == 0) {
+                    mLLReviews.setVisibility(View.GONE);
+                    mTVReviewsEmptyView.setVisibility(View.VISIBLE);
+                } else {
+                    mLLReviews.setVisibility(View.VISIBLE);
+                    mTVReviewsEmptyView.setVisibility(View.GONE);
+                }
 
                 mMovie = movie;
             } else {
@@ -317,6 +366,9 @@ public class DetailActivity
 
         }
 
+        /**
+         * Executed in the corresponding onPreExecute method of the AsyncTask.
+         */
         @Override
         public void beforeTaskExecution() {
             mScrollViewMovieData.setVisibility(View.INVISIBLE);
@@ -325,42 +377,78 @@ public class DetailActivity
 
     }
 
+    /**
+     * Listener executed by onPreExecute and onPostExecute functionality of corresponding
+     * {@link MovieInsertTask}.
+     * <p>
+     * Suitable in order to access activity's members (views, adapter, etc.)
+     */
     public class MovieInsertTaskListener implements AsyncTaskListener<Uri> {
 
         private final String LOG_TAG = MovieInsertTaskListener.class.getSimpleName();
 
 
+        /**
+         * Executed in the corresponding onPostExecute method of the AsyncTask.
+         * Set favorite button accordingly and set movie as favorite
+         *
+         * @param uri The Uri of the inserted movie
+         */
         @Override
         public void onTaskComplete(Uri uri) {
             mTVIsFavorite.setText(getString(R.string.remove_from_favorite));
-            mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_on, 0, 0, 0);
+            mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(
+                    android.R.drawable.btn_star_big_on, 0, 0, 0
+            );
             mMovie.setFavorite(true);
             Log.d(LOG_TAG, "Movie inserted");
         }
 
+        /**
+         * Executed in the corresponding onPreExecute method of the AsyncTask.
+         */
         @Override
         public void beforeTaskExecution() {
             return;
         }
     }
 
+    /**
+     * Listener executes onPreExecute and onPostExecute functionality of corresponding
+     * {@link MovieRemoveTask}.
+     * <p>
+     * Suitable in order to access activity's members (views, adapter, etc.)
+     */
     public class MovieRemoveTaskListener implements AsyncTaskListener<Integer> {
 
         private final String LOG_TAG = MovieRemoveTaskListener.class.getSimpleName();
 
 
+        /**
+         * If movie was deleted, set favorite button accordingly, and set movie as non favorite.
+         *
+         * @param rowsDeleted Number of rows deleted. Must be 1 if deletion took place.
+         */
         @Override
         public void onTaskComplete(Integer rowsDeleted) {
             if (rowsDeleted > 0) {
                 mTVIsFavorite.setText(getString(R.string.mark_as_favorite));
-                mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_off, 0, 0, 0);
+                mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(
+                        android.R.drawable.btn_star_big_off, 0, 0, 0
+                );
                 mMovie.setFavorite(false);
                 Log.d(LOG_TAG, "Movie removed");
             } else {
+
                 Log.d(LOG_TAG, "Movie has not been removed");
+                throw new UnsupportedOperationException("Movie had not been removed. This is wrong");
+
             }
         }
 
+        /**
+         * Executed in the corresponding onPreExecute method of the AsyncTask.
+         */
         @Override
         public void beforeTaskExecution() {
             return;

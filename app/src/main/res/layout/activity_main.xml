@@ -22,7 +22,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -38,7 +37,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
         android:layout_height="wrap_content"
         android:textSize="@dimen/error_message_text_size"
         android:visibility="invisible"
-        tools:text="This is an error message. Please fix the error." />
+        tools:text="Error message or information comes here." />
 
     <ProgressBar
         android:id="@+id/pb_loading_indicator"

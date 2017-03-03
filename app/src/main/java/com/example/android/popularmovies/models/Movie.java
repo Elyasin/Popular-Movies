@@ -23,11 +23,15 @@ package com.example.android.popularmovies.models;
 
 import java.io.Serializable;
 
+/**
+ * Represents a movie.
+ */
 public class Movie implements Serializable {
 
     private int mMovieID;
     private String mPosterPath;
-    private byte[] mSmallPoster;
+    private byte[] mW92Poster;
+    private byte[] mW185Poster;
     private String mOverview;
     private String mReleaseDate;
     private String mTitle;
@@ -37,22 +41,36 @@ public class Movie implements Serializable {
     private Review[] mReviewArray;
     private boolean mFavorite;
 
-    public Movie(int id) {
-        setMovieID(id);
-    }
 
-    public Movie(int movieID, String posterPath, String overview,
-                 String releaseDate, String title, double voteAverage) {
+    /**
+     * Movie with posters.
+     *
+     * @param movieID    The movie id.
+     * @param posterPath The relative poster path.
+     * @param favorite   True if the movie is in favorites, otherwise false.
+     */
+    public Movie(int movieID, String posterPath, int favorite) {
         setMovieID(movieID);
         setPosterPath(posterPath);
-        setOverview(overview);
-        setReleaseDate(releaseDate);
-        setTitle(title);
-        setVoteAverage(voteAverage);
+        setFavorite(favorite);
     }
 
+    /**
+     * Movie with details.
+     *
+     * @param movieID     The movie id.
+     * @param posterPath  The relative poster path.
+     * @param overview    Summary of the movie.
+     * @param releaseDate Release date of the movie.
+     * @param title       The title of the movie.
+     * @param runtime     The movie's runtime.
+     * @param voteAverage The movie's vote average.
+     * @param smallPoster Small (W92) poster image of the movie.
+     * @param favorite    True if the movie is in favorites, otherwise false.
+     */
     public Movie(int movieID, String posterPath, String overview,
-                 String releaseDate, String title, int runtime, double voteAverage) {
+                 String releaseDate, String title, int runtime, double voteAverage,
+                 byte[] smallPoster, int favorite) {
         setMovieID(movieID);
         setPosterPath(posterPath);
         setOverview(overview);
@@ -60,6 +78,24 @@ public class Movie implements Serializable {
         setTitle(title);
         setRuntime(runtime);
         setVoteAverage(voteAverage);
+        setW92Poster(smallPoster);
+        setFavorite(favorite);
+    }
+
+    public byte[] getW92Poster() {
+        return mW92Poster;
+    }
+
+    public void setW92Poster(byte[] mW92Poster) {
+        this.mW92Poster = mW92Poster;
+    }
+
+    public byte[] getW185Poster() {
+        return mW185Poster;
+    }
+
+    public void setW185Poster(byte[] mW185Poster) {
+        this.mW185Poster = mW185Poster;
     }
 
     public Trailer[] getTrailerArray() {
@@ -95,11 +131,11 @@ public class Movie implements Serializable {
     }
 
     public byte[] getSmallPoster() {
-        return mSmallPoster;
+        return mW92Poster;
     }
 
     public void setSmallPoster(byte[] mSmallPoster) {
-        this.mSmallPoster = mSmallPoster;
+        this.mW92Poster = mSmallPoster;
     }
 
     public String getOverview() {

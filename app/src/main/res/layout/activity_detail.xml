@@ -125,7 +125,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                         android:drawableLeft="@android:drawable/btn_star_big_off"
                         android:drawableStart="@android:drawable/btn_star_big_off"
                         android:gravity="center_vertical"
-                        android:onClick="onClickDeFavoriseMovie"
+                        android:onClick="onClickAddToOrRemoveFromFavorites"
                         android:text="@string/mark_as_favorite"
                         android:textSize="12sp"
                         tools:text="@string/mark_as_favorite" />
@@ -170,7 +170,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scrollbars="none" />
+
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_empty_trailers_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/empty_trailers_message_text_size"
+                android:visibility="invisible"
+                tools:text="There are no trailers for this movie." />
 
             <LinearLayout
                 android:id="@+id/ll_reviews"
@@ -196,7 +205,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scrollbars="none" />
+
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/tv_empty_reviews_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/empty_reviews_message_text_size"
+                android:visibility="invisible"
+                tools:text="There are no reviews for this movie." />
 
         </LinearLayout>
 

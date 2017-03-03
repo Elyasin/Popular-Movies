@@ -53,7 +53,7 @@ public class MovieInsertTask extends AsyncTask<Movie, Void, Uri> {
                 MovieContract.MovieEntry.COLUMN_MOVIE_RUNTIME, movie.getRuntime());
         movieContentValues.put(
                 MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE, movie.getVoteAverage());
-        movieContentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER,
+        movieContentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_W92_POSTER,
                 movie.getSmallPoster());
         movieContentValues.put(
                 MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH, movie.getPosterPath());

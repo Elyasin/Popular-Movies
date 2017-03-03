@@ -74,7 +74,6 @@ public class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
             String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
             movieArray = TMDbJsonUtils.getMoviesFromJson(responseStr);
 
-
         } catch (IOException | JSONException e) {
             e.printStackTrace();
         }
