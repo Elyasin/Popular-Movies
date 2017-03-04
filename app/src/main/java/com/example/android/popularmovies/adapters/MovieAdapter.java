@@ -132,6 +132,7 @@ public class MovieAdapter
      */
     public void setMovieData(Movie[] newMovieArray) {
         mMovies = newMovieArray;
+        Log.d(LOG_TAG, "Notifiy about changes in movie adapter.");
         notifyDataSetChanged();
     }
 

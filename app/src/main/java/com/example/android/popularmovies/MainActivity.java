@@ -72,17 +72,16 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_MOVIE_POSTER_PATH = 1;
     public static final int INDEX_MOVIE_FAVORITE = 2;
 
+    //Define three queries: popular, top rated and favorite
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({POPULAR_MOVIES, TOP_RATED_MOVIES, FAVORITE_MOVIES})
     public @interface MOVIES_QUERY {
     }
 
+    //Valuse must be 0, 1, 2 in order because they map to the spinner items in the menu
     public static final int POPULAR_MOVIES = 0;
     public static final int TOP_RATED_MOVIES = 1;
     public static final int FAVORITE_MOVIES = 2;
-
-    @MOVIES_QUERY
-    private int mMovieQuery = POPULAR_MOVIES;
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -91,6 +90,9 @@ public class MainActivity extends AppCompatActivity implements
     private RecyclerView mRecyclerViewMovies;
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
+
+    private int movieQuery;
+
 
     /**
      * Sets up {@link MainActivity} and initially queries database.
@@ -112,28 +114,39 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerViewMovies.setHasFixedSize(true);
         mRecyclerViewMovies.setLayoutManager(layoutManager);
         mMovieAdapter = new MovieAdapter(this, this);
+
+        //Setting the adapter will execute notifyDataSetChanged, so no need to query twice
         mRecyclerViewMovies.setAdapter(mMovieAdapter);
 
-        //By default show popular movies
-        if (savedInstanceState == null) {
-            queryMovieDatabase(mMovieQuery);
-        }
     }
 
+    /**
+     * Reads the saved position to query for corresponding movie.
+     *
+     * @param savedInstanceState The saved state contains the movie query.
+     */
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        savedInstanceState.getInt(getString(R.string.movie_query_key), mMovieQuery);
-        Log.d(LOG_TAG, "onRestoreInstanceState");
+        movieQuery =
+                savedInstanceState.getInt(getString(R.string.movie_query_key), POPULAR_MOVIES);
+
+        Log.d(LOG_TAG, "onRestoreInstanceState: " + movieQuery);
     }
 
+    /**
+     * Saves the position (movie query) for the spinner.
+     *
+     * @param outState Saved state when activity is destroyed.
+     */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(getString(R.string.movie_query_key), mMovieQuery);
-        Log.d(LOG_TAG, "onSaveInstanceState");
+        outState.putInt(getString(R.string.movie_query_key), movieQuery);
+
+        Log.d(LOG_TAG, "onSaveInstanceState: " + movieQuery);
     }
 
     /**
@@ -154,7 +167,7 @@ public class MainActivity extends AppCompatActivity implements
         if (movieQuery == POPULAR_MOVIES || movieQuery == TOP_RATED_MOVIES) {
             if (NetworkUtils.isOnline()) {
                 URL url = NetworkUtils.buildMoviesURL(movieQuery);
-                new MoviesQueryTask(this, new MoviesQueryTaskListener()).execute(url);
+                new MoviesQueryTask(new MoviesQueryTaskListener()).execute(url);
             } else {
                 mRecyclerViewMovies.setVisibility(View.INVISIBLE);
                 mErrorMessageDisplay.setVisibility(View.VISIBLE);
@@ -168,9 +181,40 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     /**
+     * Add a spinner with three options (popular, top-rated and favorites) to the menu.
+     *
+     * @param menu - The menu in which our items are placed.
+     * @return true to display the menu.
+     */
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.main, menu);
+
+        //Find/Create the action bar spinner
+        MenuItem item = menu.findItem(R.id.query_spinner);
+        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
+
+        //Set the spinner adapter
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.spinner_items, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(movieQuery);
+
+        //Register MainActivity as listener
+        //Should be set after the setAdapter is called, otherwise will trigger with default option
+        spinner.setOnItemSelectedListener(this);
+
+        return true;
+    }
+
+    /**
      * Queries the movie database for selected item: popular or top-rated or favorites
      * The Favorites are from the local storage
-     * ({@link com.example.android.popularmovies.data.MovieContentProvider})
+     * ({@link com.example.android.popularmovies.data.MovieContentProvider}).
+     * <p>
+     * Note: Initial value is fired when activity is started. Annoying, but true.
      *
      * @param adapterView The AdapterView were selection happened.
      * @param view        The view that was clicked (within the AdapterView).
@@ -180,32 +224,32 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
 
+        Log.d(LOG_TAG, "Item selected.");
+
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(POPULAR_MOVIES);
-
+            movieQuery = POPULAR_MOVIES;
             Log.d(LOG_TAG, "Display popular movies");
 
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(TOP_RATED_MOVIES);
-
+            movieQuery = TOP_RATED_MOVIES;
             Log.d(LOG_TAG, "Display top-rated movies");
 
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.favorite))) {
             this.setTitle(getString(R.string.favorite));
             queryMovieDatabase(FAVORITE_MOVIES);
-
+            movieQuery = FAVORITE_MOVIES;
             Log.d(LOG_TAG, "Display Favorite movies");
-
         }
-
     }
 
     /**
      * Not implemented.
      *
-     * @param adapterView - The AdapterView (does not contain selected item).
+     * @param adapterView The AdapterView (does not contain selected item).
      */
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
@@ -226,32 +270,6 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(startDetailActivity);
     }
 
-    /**
-     * Add a spinner with three options (popular, top-rated and favorites) to the menu.
-     *
-     * @param menu - The menu in which our items are placed.
-     * @return true to display the menu.
-     */
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-
-        getMenuInflater().inflate(R.menu.main, menu);
-
-        //Find/Create the action bar spinner
-        MenuItem item = menu.findItem(R.id.spinner);
-        Spinner spinner = (Spinner) MenuItemCompat.getActionView(item);
-
-        //Register MainActivity as listener
-        spinner.setOnItemSelectedListener(this);
-
-        //Set the spinner adapter
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.spinner_items, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
-        return true;
-    }
 
     /**
      * Listener executed by onPreExecute and onPostExecute functionality of corresponding

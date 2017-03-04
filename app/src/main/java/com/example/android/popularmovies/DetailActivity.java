@@ -73,6 +73,7 @@ public class DetailActivity
             MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE,
             MovieContract.MovieEntry.COLUMN_MOVIE_FAVORITE
     };
+
     public static final int INDEX_MOVIE_ID = 0;
     public static final int INDEX_MOVIE_POSTER = 1;
     public static final int INDEX_MOVIE_POSTER_PATH = 2;
@@ -82,6 +83,7 @@ public class DetailActivity
     public static final int INDEX_MOVIE_TITLE = 6;
     public static final int INDEX_MOVIE_VOTE_AVERAGE = 7;
     public static final int INDEX_MOVIE_FAVORITE = 8;
+
     //Projection and indices for trailers
     public static final String[] TRAILERS_PROJECTION = {
             MovieContract.TrailerEntry.COLUMN_TRAILER_ID,
@@ -90,11 +92,13 @@ public class DetailActivity
             MovieContract.TrailerEntry.COLUMN_TRAILER_SITE,
             MovieContract.TrailerEntry.COLUMN_TRAILER_TYPE
     };
+
     public static final int INDEX_TRAILER_ID = 0;
     public static final int INDEX_TRAILER_KEY = 1;
     public static final int INDEX_TRAILER_NAME = 2;
     public static final int INDEX_TRAILER_SITE = 3;
     public static final int INDEX_TRAILER_TYPE = 4;
+
     //Projection and indices for reviews
     public static final String[] REVIEWS_PROJECTION = {
             MovieContract.ReviewEntry.COLUMN_REVIEW_ID,
@@ -106,11 +110,15 @@ public class DetailActivity
     public static final int INDEX_REVIEW_AUTHOR = 1;
     public static final int INDEX_REVIEW_CONTENT = 2;
     public static final int INDEX_REVIEW_URL = 3;
+
     private static final String LOG_TAG = DetailActivity.class.getSimpleName();
+
+
     //The main top level views
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
     private ScrollView mScrollViewMovieData;
+
     //View details about a movie
     private ImageView mIVSmallPoster;
     private TextView mTVOverview;
@@ -118,11 +126,13 @@ public class DetailActivity
     private TextView mTVRuntime;
     private TextView mTVVoteAverage;
     private TextView mTVIsFavorite;
+
     //Trailers of a movie
     private LinearLayout mLLTrailers;
     private RecyclerView mRVTrailers;
     private TrailerAdapter mTrailerAdapter;
     private TextView mTVTrailersEmptyView;
+
     //Reviews of a movie (only first page is shown if there is any)
     private LinearLayout mLLReviews;
     private RecyclerView mRVReviews;
@@ -138,6 +148,7 @@ public class DetailActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_detail);
 
         //Top-level main views
@@ -162,7 +173,7 @@ public class DetailActivity
                 new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRVTrailers.setHasFixedSize(true);
         mRVTrailers.setLayoutManager(trailersLayoutManager);
-        mTrailerAdapter = new TrailerAdapter(this, this);
+        mTrailerAdapter = new TrailerAdapter(this);
         mRVTrailers.setAdapter(mTrailerAdapter);
 
 

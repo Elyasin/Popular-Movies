@@ -78,23 +78,26 @@ public class NetworkUtils {
     /**
      * Builds the URL used to query TMDb for list of movies, either top-rated or popular
      *
-     * @param movieQueryKey The movie query key to create the URL.
+     * @param movieQuery The movie query to create the URL.
      * @return The URL used to query the TMDb server.
      */
-    public static URL buildMoviesURL(@MainActivity.MOVIES_QUERY int movieQueryKey) {
+    public static URL buildMoviesURL(@MainActivity.MOVIES_QUERY int movieQuery) {
 
         Uri builtUri = Uri.parse(TMDb_BASE_URL);
 
-        if (movieQueryKey == MainActivity.POPULAR_MOVIES) {
+        if (movieQuery == MainActivity.TOP_RATED_MOVIES) {
             builtUri = builtUri.buildUpon().
                     appendEncodedPath(TMDb_top_rated).
                     appendQueryParameter(TMDb_QUERY_API_KEY_PARAM, BuildConfig.TMDb_API_KEY).
                     build();
-        } else {
+        } else if (movieQuery == MainActivity.POPULAR_MOVIES) {
             builtUri = builtUri.buildUpon().
                     appendEncodedPath(TMDb_popular).
                     appendQueryParameter(TMDb_QUERY_API_KEY_PARAM, BuildConfig.TMDb_API_KEY).
                     build();
+        } else {
+            Log.d(LOG_TAG, "Movie query unknown.");
+            return null;
         }
 
         URL url = null;
@@ -104,7 +107,7 @@ public class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.d(LOG_TAG, "URL created " + url);
+        Log.d(LOG_TAG, "URL created (buildMoviesURL) " + url);
 
         return url;
     }
@@ -132,7 +135,7 @@ public class NetworkUtils {
             e.printStackTrace();
         }
 
-        Log.d(LOG_TAG, "URL created " + url);
+        Log.d(LOG_TAG, "URL created (buildMovieURL)" + url);
 
         return url;
     }
