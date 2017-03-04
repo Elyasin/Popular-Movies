@@ -79,9 +79,9 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     //Valuse must be 0, 1, 2 in order because they map to the spinner items in the menu
-    public static final int POPULAR_MOVIES = 0;
-    public static final int TOP_RATED_MOVIES = 1;
-    public static final int FAVORITE_MOVIES = 2;
+    public static final int POPULAR_MOVIES = 0;     //position 0 in spinner
+    public static final int TOP_RATED_MOVIES = 1;   //position 1 in spinner
+    public static final int FAVORITE_MOVIES = 2;    //position 2 in spinner
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 

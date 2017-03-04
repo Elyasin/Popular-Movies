@@ -32,6 +32,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
     <string name="no_internet_access">You don\'t seem to have internet access. Cannot retrieve data.</string>
     <string name="no_favorites_in_list">Your favorites list is empty.</string>
 
+    <!--
+    IMPORTANT: If spinner items are added, removed or the order is changed
+     you have to adapt MOVIES_QUERY interface definitions in MainActivity accordingly.
+    -->
     <string-array name="spinner_items">
         <item>@string/popular</item>
         <item>@string/top_rated</item>
