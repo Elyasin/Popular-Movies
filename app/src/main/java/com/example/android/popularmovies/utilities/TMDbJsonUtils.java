@@ -1,25 +1,27 @@
-/**
- * MIT License
- * <p>
- * Copyright (c) 2017 Elyasin Shaladi
- * <p>
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p>
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * <p>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+  MIT License
+
+  Copyright (c) 2017 Elyasin Shaladi
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute,
+  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.example.android.popularmovies.utilities;
+
+import android.util.Log;
 
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.models.Review;
@@ -82,6 +84,8 @@ public final class TMDbJsonUtils {
             parsedMovies[i] = new Movie(movieID, posterPath, overview, releaseDate,
                     title, 0, voteAverage, null, 0);
         }
+
+        Log.d(LOG_TAG, "Movie array created with " + parsedMovies.length + " movies.");
 
         return parsedMovies;
     }
@@ -183,6 +187,8 @@ public final class TMDbJsonUtils {
             reviewArray[i] = new Review(reviewID, author, content, reviewURL);
         }
         movie.setReviewArray(reviewArray);
+
+        Log.d(LOG_TAG, "Movie object + " + movie.getMovieID() + " created.");
 
         return movie;
     }

@@ -1,22 +1,22 @@
-/**
- * MIT License
- * <p>
- * Copyright (c) 2017 Elyasin Shaladi
- * <p>
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p>
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * <p>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+  MIT License
+  <p>
+  Copyright (c) 2017 Elyasin Shaladi
+  <p>
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute,
+  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+  <p>
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.
+  <p>
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.example.android.popularmovies;
@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
@@ -47,6 +48,8 @@ import com.example.android.popularmovies.data.MovieContract;
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URL;
 
 /**
@@ -58,25 +61,35 @@ public class MainActivity extends AppCompatActivity implements
         AdapterView.OnItemSelectedListener,
         MovieAdapter.MovieAdapterOnClickHandler {
 
-    private static final String LOG_TAG = MainActivity.class.getSimpleName();
-
-
     // Projection and indices for movies
     public static final String[] MOVIES_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
             MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
             MovieContract.MovieEntry.COLUMN_MOVIE_FAVORITE
     };
+
     public static final int INDEX_MOVIE_ID = 0;
     public static final int INDEX_MOVIE_POSTER_PATH = 1;
     public static final int INDEX_MOVIE_FAVORITE = 2;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({POPULAR_MOVIES, TOP_RATED_MOVIES, FAVORITE_MOVIES})
+    public @interface MOVIES_QUERY {
+    }
+
+    public static final int POPULAR_MOVIES = 0;
+    public static final int TOP_RATED_MOVIES = 1;
+    public static final int FAVORITE_MOVIES = 2;
+
+    @MOVIES_QUERY
+    private int mMovieQuery = POPULAR_MOVIES;
+
+    private static final String LOG_TAG = MainActivity.class.getSimpleName();
+
 
     private MovieAdapter mMovieAdapter;
     private RecyclerView mRecyclerViewMovies;
-
     private ProgressBar mLoadingIndicator;
-
     private TextView mErrorMessageDisplay;
 
     /**
@@ -102,35 +115,56 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerViewMovies.setAdapter(mMovieAdapter);
 
         //By default show popular movies
-        queryMovieDatabase(false);
-    }
-
-    /**
-     * Constructs the URL (using {@link NetworkUtils}) and fires off
-     * an AsyncTask to perform the GET request using our {@link MoviesQueryTask}.
-     * If there is no internet connection a message is displayed.
-     *
-     * @param rated - If true queries with top-rated URL, otherwise popular URL.
-     */
-    private void queryMovieDatabase(boolean rated) {
-        if (NetworkUtils.isOnline()) {
-            URL url = NetworkUtils.buildMoviesURL(rated);
-            new MoviesQueryTask(this, new MoviesQueryTaskListener()).execute(url);
-        } else {
-            mRecyclerViewMovies.setVisibility(View.INVISIBLE);
-            mErrorMessageDisplay.setVisibility(View.VISIBLE);
+        if (savedInstanceState == null) {
+            queryMovieDatabase(mMovieQuery);
         }
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        savedInstanceState.getInt(getString(R.string.movie_query_key), mMovieQuery);
+        Log.d(LOG_TAG, "onRestoreInstanceState");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putInt(getString(R.string.movie_query_key), mMovieQuery);
+        Log.d(LOG_TAG, "onSaveInstanceState");
+    }
 
     /**
-     * Fires off AsyncTask (see {@link MoviesLocalQueryTask}) to query
-     * {@link com.example.android.popularmovies.data.MovieContentProvider}
-     * for favorite movies.
+     * Depending on the movie query either
+     * <p>
+     * - Constructs the URL (using {@link NetworkUtils}) and fires off
+     * an AsyncTask to perform the GET request using our {@link MoviesQueryTask}.
+     * If there is no internet connection a message is displayed.
+     * <p>
+     * - Fires off an AsyncTask to perform a query on local storage
+     * ({@link com.example.android.popularmovies.data.MovieContentProvider}) using
+     * {@link MoviesLocalQueryTask}.
+     *
+     * @param movieQuery The movie query key.
      */
-    private void queryLocalMovieDatabase() {
-        Uri uri = MovieContract.MovieEntry.CONTENT_URI;
-        new MoviesLocalQueryTask(this, new MoviesLocalQueryTaskListener()).execute(uri);
+    private void queryMovieDatabase(@MOVIES_QUERY int movieQuery) {
+
+        if (movieQuery == POPULAR_MOVIES || movieQuery == TOP_RATED_MOVIES) {
+            if (NetworkUtils.isOnline()) {
+                URL url = NetworkUtils.buildMoviesURL(movieQuery);
+                new MoviesQueryTask(this, new MoviesQueryTaskListener()).execute(url);
+            } else {
+                mRecyclerViewMovies.setVisibility(View.INVISIBLE);
+                mErrorMessageDisplay.setVisibility(View.VISIBLE);
+            }
+        } else if (movieQuery == FAVORITE_MOVIES) {
+            Uri uri = MovieContract.MovieEntry.CONTENT_URI;
+            new MoviesLocalQueryTask(this, new MoviesLocalQueryTaskListener()).execute(uri);
+        } else {
+            Log.d(LOG_TAG, "Did not query any database.");
+        }
     }
 
     /**
@@ -148,19 +182,19 @@ public class MainActivity extends AppCompatActivity implements
 
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
-            queryMovieDatabase(false);
+            queryMovieDatabase(POPULAR_MOVIES);
 
             Log.d(LOG_TAG, "Display popular movies");
 
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
-            queryMovieDatabase(true);
+            queryMovieDatabase(TOP_RATED_MOVIES);
 
             Log.d(LOG_TAG, "Display top-rated movies");
 
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.favorite))) {
             this.setTitle(getString(R.string.favorite));
-            queryLocalMovieDatabase();
+            queryMovieDatabase(FAVORITE_MOVIES);
 
             Log.d(LOG_TAG, "Display Favorite movies");
 
@@ -191,7 +225,6 @@ public class MainActivity extends AppCompatActivity implements
         startDetailActivity.putExtra(getString(R.string.movie_key), movie.getMovieID());
         startActivity(startDetailActivity);
     }
-
 
     /**
      * Add a spinner with three options (popular, top-rated and favorites) to the menu.
@@ -226,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
-    public class MoviesQueryTaskListener implements AsyncTaskListener<Movie[]> {
+    private class MoviesQueryTaskListener implements AsyncTaskListener<Movie[]> {
 
         /**
          * Executed in the corresponding onPostExecute method of the AsyncTask.
@@ -265,7 +298,7 @@ public class MainActivity extends AppCompatActivity implements
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
-    public class MoviesLocalQueryTaskListener implements AsyncTaskListener<Movie[]> {
+    private class MoviesLocalQueryTaskListener implements AsyncTaskListener<Movie[]> {
 
         /**
          * Executed in the corresponding onPostExecute method of the AsyncTask.

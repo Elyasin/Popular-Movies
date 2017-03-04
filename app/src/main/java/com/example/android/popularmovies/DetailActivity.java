@@ -1,22 +1,22 @@
-/**
- * MIT License
- * <p>
- * Copyright (c) 2017 Elyasin Shaladi
- * <p>
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p>
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * <p>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+  MIT License
+
+  Copyright (c) 2017 Elyasin Shaladi
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute,
+  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
 package com.example.android.popularmovies;
@@ -61,36 +61,6 @@ public class DetailActivity
         TrailerAdapter.TrailerAdapterOnClickHandler,
         ReviewAdapter.ReviewAdapterOnClickHandler {
 
-    private static final String LOG_TAG = DetailActivity.class.getSimpleName();
-
-    //The main top level views
-    private ProgressBar mLoadingIndicator;
-    private TextView mErrorMessageDisplay;
-    private ScrollView mScrollViewMovieData;
-
-    //View details about a movie
-    private ImageView mIVSmallPoster;
-    private TextView mTVOverview;
-    private TextView mTVReleaseDate;
-    private TextView mTVRuntime;
-    private TextView mTVVoteAverage;
-    private TextView mTVIsFavorite;
-
-    //Trailers of a movie
-    private LinearLayout mLLTrailers;
-    private RecyclerView mRVTrailers;
-    private TrailerAdapter mTrailerAdapter;
-    private TextView mTVTrailersEmptyView;
-
-    //Reviews of a movie (only first page is shown if there is any)
-    private LinearLayout mLLReviews;
-    private RecyclerView mRVReviews;
-    private ReviewAdapter mReviewAdapter;
-    private TextView mTVReviewsEmptyView;
-
-    private Movie mMovie;
-
-
     // Projection and indices for movie details
     public static final String[] MOVIE_DETAIL_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
@@ -112,8 +82,6 @@ public class DetailActivity
     public static final int INDEX_MOVIE_TITLE = 6;
     public static final int INDEX_MOVIE_VOTE_AVERAGE = 7;
     public static final int INDEX_MOVIE_FAVORITE = 8;
-
-
     //Projection and indices for trailers
     public static final String[] TRAILERS_PROJECTION = {
             MovieContract.TrailerEntry.COLUMN_TRAILER_ID,
@@ -127,8 +95,6 @@ public class DetailActivity
     public static final int INDEX_TRAILER_NAME = 2;
     public static final int INDEX_TRAILER_SITE = 3;
     public static final int INDEX_TRAILER_TYPE = 4;
-
-
     //Projection and indices for reviews
     public static final String[] REVIEWS_PROJECTION = {
             MovieContract.ReviewEntry.COLUMN_REVIEW_ID,
@@ -140,6 +106,29 @@ public class DetailActivity
     public static final int INDEX_REVIEW_AUTHOR = 1;
     public static final int INDEX_REVIEW_CONTENT = 2;
     public static final int INDEX_REVIEW_URL = 3;
+    private static final String LOG_TAG = DetailActivity.class.getSimpleName();
+    //The main top level views
+    private ProgressBar mLoadingIndicator;
+    private TextView mErrorMessageDisplay;
+    private ScrollView mScrollViewMovieData;
+    //View details about a movie
+    private ImageView mIVSmallPoster;
+    private TextView mTVOverview;
+    private TextView mTVReleaseDate;
+    private TextView mTVRuntime;
+    private TextView mTVVoteAverage;
+    private TextView mTVIsFavorite;
+    //Trailers of a movie
+    private LinearLayout mLLTrailers;
+    private RecyclerView mRVTrailers;
+    private TrailerAdapter mTrailerAdapter;
+    private TextView mTVTrailersEmptyView;
+    //Reviews of a movie (only first page is shown if there is any)
+    private LinearLayout mLLReviews;
+    private RecyclerView mRVReviews;
+    private ReviewAdapter mReviewAdapter;
+    private TextView mTVReviewsEmptyView;
+    private Movie mMovie;
 
     /**
      * Sets up the activity with data passed through the Intent.
@@ -202,7 +191,7 @@ public class DetailActivity
         if (intent != null) {
 
             //Movie ID must be passed to Intent, otherwise throw exception
-            int movieID = (int) intent.getIntExtra(getString(R.string.movie_key), -1);
+            int movieID = intent.getIntExtra(getString(R.string.movie_key), -1);
             if (movieID == -1) {
                 throw new IllegalArgumentException(LOG_TAG + ": No movie selected");
             }
@@ -229,7 +218,7 @@ public class DetailActivity
     }
 
     /**
-     * TODO When clicked on a review....
+     * When clicked on a review....
      *
      * @param review The review that was clicked on.
      */
@@ -264,7 +253,7 @@ public class DetailActivity
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
-    public class MovieDetailsQueryTaskListener implements AsyncTaskListener<Movie> {
+    private class MovieDetailsQueryTaskListener implements AsyncTaskListener<Movie> {
 
         private final String LOG_TAG = MovieDetailsQueryTaskListener.class.getSimpleName();
 
@@ -275,7 +264,7 @@ public class DetailActivity
          * @param movie The movie that was retrieved.
          */
         @Override
-        public void onTaskComplete(final Movie movie) {
+        public void onTaskComplete(Movie movie) {
 
             mLoadingIndicator.setVisibility(View.INVISIBLE);
 
@@ -383,7 +372,7 @@ public class DetailActivity
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
-    public class MovieInsertTaskListener implements AsyncTaskListener<Uri> {
+    private class MovieInsertTaskListener implements AsyncTaskListener<Uri> {
 
         private final String LOG_TAG = MovieInsertTaskListener.class.getSimpleName();
 
@@ -409,7 +398,6 @@ public class DetailActivity
          */
         @Override
         public void beforeTaskExecution() {
-            return;
         }
     }
 
@@ -419,7 +407,7 @@ public class DetailActivity
      * <p>
      * Suitable in order to access activity's members (views, adapter, etc.)
      */
-    public class MovieRemoveTaskListener implements AsyncTaskListener<Integer> {
+    private class MovieRemoveTaskListener implements AsyncTaskListener<Integer> {
 
         private final String LOG_TAG = MovieRemoveTaskListener.class.getSimpleName();
 
@@ -451,7 +439,6 @@ public class DetailActivity
          */
         @Override
         public void beforeTaskExecution() {
-            return;
         }
     }
 

@@ -1,3 +1,24 @@
+/*
+  MIT License
+
+  Copyright (c) 2017 Elyasin Shaladi
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute,
+  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 package com.example.android.popularmovies.asyncTasks;
 
 import android.content.Context;
@@ -13,25 +34,46 @@ import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_ID;
 import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_POSTER_PATH;
 import static com.example.android.popularmovies.MainActivity.MOVIES_PROJECTION;
 
+/**
+ * AsyncTask to download list of movies from {@link com.example.android.popularmovies.data.MovieContentProvider}.
+ * Params is the movies Uri.
+ * Result is an array of Movie objects.
+ */
 public class MoviesLocalQueryTask extends AsyncTask<Uri, Void, Movie[]> {
 
     private static final String LOG_TAG = MoviesLocalQueryTask.class.getSimpleName();
+
 
     private AsyncTaskListener<Movie[]> mListener;
 
     private Context mContext;
 
-    public MoviesLocalQueryTask(Context context, AsyncTaskListener listener) {
+    /**
+     * References to activity and listener(, which are usually both the same class).
+     *
+     * @param context  The activity using this task.
+     * @param listener Listener to this task. Triggered before and after task completion.
+     */
+    public MoviesLocalQueryTask(Context context, AsyncTaskListener<Movie[]> listener) {
         this.mContext = context;
         this.mListener = listener;
     }
 
+    /**
+     * Delegate to listener.
+     */
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
         this.mListener.beforeTaskExecution();
     }
 
+    /**
+     * Retrieval of movie data in form of an Movie[] array.
+     *
+     * @param params Contains the Uri at position 0.
+     * @return Movie array containing all retrieved movies information from local storage.
+     */
     @Override
     protected Movie[] doInBackground(Uri... params) {
         Uri uri = params[0];
@@ -59,9 +101,14 @@ public class MoviesLocalQueryTask extends AsyncTask<Uri, Void, Movie[]> {
         return movieArray;
     }
 
+    /**
+     * Delegate to listener.
+     *
+     * @param movieArray The movie array.
+     */
     @Override
-    protected void onPostExecute(Movie[] movies) {
-        super.onPostExecute(movies);
-        this.mListener.onTaskComplete(movies);
+    protected void onPostExecute(Movie[] movieArray) {
+        super.onPostExecute(movieArray);
+        this.mListener.onTaskComplete(movieArray);
     }
 }

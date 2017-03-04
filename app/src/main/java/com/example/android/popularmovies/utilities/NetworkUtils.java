@@ -1,29 +1,30 @@
-/**
- * MIT License
- * <p>
- * Copyright (c) 2017 Elyasin Shaladi
- * <p>
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p>
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * <p>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+  MIT License
+
+  Copyright (c) 2017 Elyasin Shaladi
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute,
+  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.example.android.popularmovies.utilities;
 
 import android.net.Uri;
+import android.util.Log;
 
 import com.example.android.popularmovies.BuildConfig;
-import com.example.android.popularmovies.data.MovieContract;
+import com.example.android.popularmovies.MainActivity;
 import com.example.android.popularmovies.models.Movie;
 
 import java.io.IOException;
@@ -59,20 +60,16 @@ public class NetworkUtils {
     public final static String IMDB_IMAGE_W92_SIZE = "w92";         // for detail activity
 
     //TMDb URL components
-    public final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/movie/";
-    public final static String TMDb_popular = "popular";
-    public final static String TMDb_top_rated = "top_rated";
+    private final static String TMDb_BASE_URL = "http://api.themoviedb.org/3/movie/";
+    private final static String TMDb_popular = "popular";
+    private final static String TMDb_top_rated = "top_rated";
 
-    //trailers and reviews end point string must be preceded by a movie id
-    //to form e.g. http://api.themoviedb.org/3/movie/{id}/videos?api_key=...
-    public final static String TMDb_trailers = "videos";
-    public final static String TMDb_reviews = "reviews";
-    public final static String TMDb_QUERY_API_KEY_PARAM = "api_key";
-    public final static String TMDb_QUERY_API_KEY_VALUE = BuildConfig.TMDb_API_KEY;
+    private final static String TMDb_QUERY_API_KEY_PARAM = "api_key";
+    private final static String TMDb_QUERY_API_KEY_VALUE = BuildConfig.TMDb_API_KEY;
 
     //Request videos and reviews together with a movie data
-    public final static String TMDb_QUERY_APPEND_TO_RESPONSE_KEY = "append_to_response";
-    public final static String TMDb_QUERY_APPEND_TO_RESPONSE_VALUES = "videos,reviews";
+    private final static String TMDb_QUERY_APPEND_TO_RESPONSE_KEY = "append_to_response";
+    private final static String TMDb_QUERY_APPEND_TO_RESPONSE_VALUES = "videos,reviews";
 
     //Youtube base URL
     public final static String YOUTUBE_BASE_URL = "https://www.youtube.com/watch?v=";
@@ -81,14 +78,14 @@ public class NetworkUtils {
     /**
      * Builds the URL used to query TMDb for list of movies, either top-rated or popular
      *
-     * @param rated If True then return top-rated movies URL otherwise most popular movies.
+     * @param movieQueryKey The movie query key to create the URL.
      * @return The URL used to query the TMDb server.
      */
-    public static URL buildMoviesURL(boolean rated) {
+    public static URL buildMoviesURL(@MainActivity.MOVIES_QUERY int movieQueryKey) {
 
         Uri builtUri = Uri.parse(TMDb_BASE_URL);
 
-        if (rated) {
+        if (movieQueryKey == MainActivity.POPULAR_MOVIES) {
             builtUri = builtUri.buildUpon().
                     appendEncodedPath(TMDb_top_rated).
                     appendQueryParameter(TMDb_QUERY_API_KEY_PARAM, BuildConfig.TMDb_API_KEY).
@@ -100,13 +97,14 @@ public class NetworkUtils {
                     build();
         }
 
-
         URL url = null;
         try {
             url = new URL(builtUri.toString());
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
+
+        Log.d(LOG_TAG, "URL created " + url);
 
         return url;
     }
@@ -127,7 +125,6 @@ public class NetworkUtils {
                 appendQueryParameter(TMDb_QUERY_APPEND_TO_RESPONSE_KEY, TMDb_QUERY_APPEND_TO_RESPONSE_VALUES).
                 build();
 
-
         URL url = null;
         try {
             url = new URL(builtUri.toString());
@@ -135,26 +132,7 @@ public class NetworkUtils {
             e.printStackTrace();
         }
 
-        return url;
-    }
-
-
-    /**
-     * Builds the URL used to query {@link com.example.android.popularmovies.data.MovieContentProvider}
-     * for favorite movies.
-     *
-     * @return The URL used to query for the favorite movies.
-     */
-    public static URL buildFavoriteMoviesURL() {
-
-        Uri builtUri = MovieContract.MovieEntry.CONTENT_URI;
-
-        URL url = null;
-        try {
-            url = new URL(builtUri.toString());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        }
+        Log.d(LOG_TAG, "URL created " + url);
 
         return url;
     }
@@ -199,9 +177,7 @@ public class NetworkUtils {
             int exitValue = ipProcess.waitFor();
             return (exitValue == 0);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
 

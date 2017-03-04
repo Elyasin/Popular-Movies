@@ -1,22 +1,22 @@
-/**
- * MIT License
- * <p>
- * Copyright (c) 2017 Elyasin Shaladi
- * <p>
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
- * associated documentation files (the "Software"), to deal in the Software without restriction,
- * including without limitation the rights to use, copy, modify, merge, publish, distribute,
- * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- * <p>
- * The above copyright notice and this permission notice shall be included in all copies or
- * substantial portions of the Software.
- * <p>
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
- * NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+/*
+  MIT License
+
+  Copyright (c) 2017 Elyasin Shaladi
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
+  associated documentation files (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge, publish, distribute,
+  sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or
+  substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
+  NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+  DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 package com.example.android.popularmovies.asyncTasks;
 
@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.net.URL;
 
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_FAVORITE;
+import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_ID;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_OVERVIEW;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_POSTER;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_POSTER_PATH;
@@ -60,23 +61,32 @@ import static com.example.android.popularmovies.DetailActivity.REVIEWS_PROJECTIO
 import static com.example.android.popularmovies.DetailActivity.TRAILERS_PROJECTION;
 
 /**
- * AsyncTask to download list of movies.
+ * AsyncTask to download movie details.
+ * Params is the movie id.
+ * Result is a movie object.
  */
 public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
 
     private static final String LOG_TAG = MovieDetailsQueryTask.class.getSimpleName();
 
+
     private AsyncTaskListener<Movie> mListener;
 
     private Context mContext;
 
+    /**
+     * References to activity and listener(, which are usually both the same class).
+     *
+     * @param context  The activity using this task.
+     * @param listener Listener to this task. Triggered before and after task completion.
+     */
     public MovieDetailsQueryTask(Context context, AsyncTaskListener<Movie> listener) {
         this.mContext = context;
         this.mListener = listener;
     }
 
     /**
-     * Show the progress bar.
+     * Delegate to listener.
      */
     @Override
     protected void onPreExecute() {
@@ -85,10 +95,10 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
     }
 
     /**
-     * Retreival of movie data in form of a Movie array.
+     * Retreival of movie data.
      *
-     * @param id - the movie id.
-     * @return Detailed information about a movie, including videos and reviews.
+     * @param id The movie id (at position 0).
+     * @return A movie object, including trailers and reviews.
      */
     @Override
     protected Movie doInBackground(Integer... id) {
@@ -104,7 +114,7 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
                 "movie_id=?", new String[]{movieIDString}, null);
 
         if (movieCursor != null && movieCursor.moveToFirst()) {
-            movie = new Movie(movieID,
+            movie = new Movie(movieCursor.getInt(INDEX_MOVIE_ID),
                     movieCursor.getString(INDEX_MOVIE_POSTER_PATH),
                     movieCursor.getString(INDEX_MOVIE_OVERVIEW),
                     movieCursor.getString(INDEX_MOVIE_RELEASE_DATE),
@@ -180,10 +190,9 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
     }
 
     /**
-     * Hide progress bar.
-     * Show movie posters if ok, otherwise display error message.
+     * Delegate to listener.
      *
-     * @param movie - The result of retrieved movie data (if any).
+     * @param movie The movie object.
      */
     @Override
     protected void onPostExecute(Movie movie) {
