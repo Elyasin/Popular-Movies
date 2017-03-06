@@ -47,11 +47,15 @@ public class Movie implements Serializable {
      *
      * @param movieID    The movie id.
      * @param posterPath The relative poster path.
+     * @param w92Poster  Small image bytes (w92).
+     * @param w185Poster Big image bytes (w185).
      * @param favorite   True if the movie is in favorites, otherwise false.
      */
-    public Movie(int movieID, String posterPath, int favorite) {
+    public Movie(int movieID, String posterPath, byte[] w92Poster, byte[] w185Poster, int favorite) {
         setMovieID(movieID);
         setPosterPath(posterPath);
+        setW92Poster(w92Poster);
+        setW185Poster(w185Poster);
         setFavorite(favorite);
     }
 
@@ -65,12 +69,13 @@ public class Movie implements Serializable {
      * @param title       The title of the movie.
      * @param runtime     The movie's runtime.
      * @param voteAverage The movie's vote average.
-     * @param smallPoster Small (W92) poster image of the movie.
+     * @param w92Poster   Small (W92) poster image of the movie.
+     * @param w185Poster  Big (W185) poster image for the movie.
      * @param favorite    True if the movie is in favorites, otherwise false.
      */
     public Movie(int movieID, String posterPath, String overview,
                  String releaseDate, String title, int runtime, double voteAverage,
-                 byte[] smallPoster, int favorite) {
+                 byte[] w92Poster, byte[] w185Poster, int favorite) {
         setMovieID(movieID);
         setPosterPath(posterPath);
         setOverview(overview);
@@ -78,7 +83,8 @@ public class Movie implements Serializable {
         setTitle(title);
         setRuntime(runtime);
         setVoteAverage(voteAverage);
-        setW92Poster(smallPoster);
+        setW92Poster(w92Poster);
+        setW185Poster(w185Poster);
         setFavorite(favorite);
     }
 
@@ -130,14 +136,6 @@ public class Movie implements Serializable {
         this.mPosterPath = mPosterPath;
     }
 
-    public byte[] getSmallPoster() {
-        return mW92Poster;
-    }
-
-    public void setSmallPoster(byte[] mSmallPoster) {
-        this.mW92Poster = mSmallPoster;
-    }
-
     public String getOverview() {
         return mOverview;
     }
@@ -183,7 +181,7 @@ public class Movie implements Serializable {
     }
 
     public void setFavorite(int mFavorite) {
-        this.mFavorite = (mFavorite == 0 ? false : true);
+        this.mFavorite = (mFavorite != 0);
     }
 
     public void setFavorite(boolean mFavorite) {

@@ -91,11 +91,17 @@ public class MovieInsertTask extends AsyncTask<Movie, Void, Uri> {
                 MovieContract.MovieEntry.COLUMN_MOVIE_RUNTIME, movie.getRuntime());
         movieContentValues.put(
                 MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE, movie.getVoteAverage());
-        movieContentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_W92_POSTER,
-                movie.getSmallPoster());
         movieContentValues.put(
                 MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH, movie.getPosterPath());
         movieContentValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_FAVORITE, true);
+        Log.d(LOG_TAG, "Small poster size: " + movie.getW92Poster().length);
+        movieContentValues.put(
+                MovieContract.MovieEntry.COLUMN_MOVIE_W92_POSTER,
+                movie.getW92Poster());
+        Log.d(LOG_TAG, "Big poster size: " + movie.getW185Poster().length);
+        movieContentValues.put(
+                MovieContract.MovieEntry.COLUMN_MOVIE_W185_POSTER,
+                movie.getW185Poster());
 
         Uri uri = this.mContext.getContentResolver().
                 insert(MovieContract.MovieEntry.CONTENT_URI, movieContentValues);

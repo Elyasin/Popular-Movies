@@ -23,6 +23,8 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.IntDef;
@@ -36,6 +38,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -47,7 +50,9 @@ import com.example.android.popularmovies.asyncTasks.MoviesQueryTask;
 import com.example.android.popularmovies.data.MovieContract;
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
+import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.URL;
@@ -65,12 +70,16 @@ public class MainActivity extends AppCompatActivity implements
     public static final String[] MOVIES_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
             MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
+            MovieContract.MovieEntry.COLUMN_MOVIE_W92_POSTER,
+            MovieContract.MovieEntry.COLUMN_MOVIE_W185_POSTER,
             MovieContract.MovieEntry.COLUMN_MOVIE_FAVORITE
     };
 
     public static final int INDEX_MOVIE_ID = 0;
     public static final int INDEX_MOVIE_POSTER_PATH = 1;
-    public static final int INDEX_MOVIE_FAVORITE = 2;
+    public static final int INDEX_MOVIE_W92_POSTER = 2;
+    public static final int INDEX_MOVIE_W185_POSTER = 3;
+    public static final int INDEX_MOVIE_FAVORITE = 4;
 
     //Define three queries: popular, top rated and favorite
     @Retention(RetentionPolicy.SOURCE)
@@ -117,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements
 
         //Setting the adapter will execute notifyDataSetChanged, so no need to query twice
         mRecyclerViewMovies.setAdapter(mMovieAdapter);
-
+        Picasso.with(this).setIndicatorsEnabled(true);
     }
 
     /**
@@ -167,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements
         if (movieQuery == POPULAR_MOVIES || movieQuery == TOP_RATED_MOVIES) {
             if (NetworkUtils.isOnline()) {
                 URL url = NetworkUtils.buildMoviesURL(movieQuery);
-                new MoviesQueryTask(new MoviesQueryTaskListener()).execute(url);
+                new MoviesQueryTask(this, new MoviesQueryTaskListener()).execute(url);
             } else {
                 mRecyclerViewMovies.setVisibility(View.INVISIBLE);
                 mErrorMessageDisplay.setVisibility(View.VISIBLE);
@@ -262,11 +271,26 @@ public class MainActivity extends AppCompatActivity implements
      * @param movie The movie that was clicked on.
      */
     @Override
-    public void onClick(Movie movie) {
+    public void onClick(Movie movie, View view) {
+
+        if (movie.getW185Poster() == null) {
+
+            //Save the image bytes in movie in case it is added to favorites
+            ImageView imageView = (ImageView) view.findViewById(R.id.iv_w185_poster);
+            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+            ByteArrayOutputStream binOutStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 85, binOutStream);
+            byte[] imageInByte = binOutStream.toByteArray();
+            movie.setW185Poster(imageInByte);
+
+            Log.d(LOG_TAG, "W185 poster added to movie. Size is " + binOutStream.size() / 1024 + " KB.");
+        }
+
+        //Now start the detail activity
         Context context = MainActivity.this;
         Class destinationActivity = DetailActivity.class;
         Intent startDetailActivity = new Intent(context, destinationActivity);
-        startDetailActivity.putExtra(getString(R.string.movie_key), movie.getMovieID());
+        startDetailActivity.putExtra(getString(R.string.movie_key), movie);
         startActivity(startDetailActivity);
     }
 

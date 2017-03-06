@@ -74,7 +74,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:id="@+id/iv_small_poster"
+                    android:id="@+id/iv_w92_poster"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
@@ -125,7 +125,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                         android:drawableLeft="@android:drawable/btn_star_big_off"
                         android:drawableStart="@android:drawable/btn_star_big_off"
                         android:gravity="center_vertical"
-                        android:onClick="onClickAddToOrRemoveFromFavorites"
+                        android:onClick="onClickAddOrRemoveFavorite"
                         android:text="@string/mark_as_favorite"
                         android:textSize="12sp"
                         tools:text="@string/mark_as_favorite" />

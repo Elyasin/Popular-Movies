@@ -22,6 +22,9 @@
 package com.example.android.popularmovies;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -46,9 +49,9 @@ import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.models.Review;
 import com.example.android.popularmovies.models.Trailer;
 import com.example.android.popularmovies.utilities.NetworkUtils;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Locale;
 
 /**
@@ -65,6 +68,7 @@ public class DetailActivity
     public static final String[] MOVIE_DETAIL_PROJECTION = {
             MovieContract.MovieEntry.COLUMN_MOVIE_ID,
             MovieContract.MovieEntry.COLUMN_MOVIE_W92_POSTER,
+            MovieContract.MovieEntry.COLUMN_MOVIE_W185_POSTER,
             MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
             MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW,
             MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE,
@@ -75,14 +79,15 @@ public class DetailActivity
     };
 
     public static final int INDEX_MOVIE_ID = 0;
-    public static final int INDEX_MOVIE_POSTER = 1;
-    public static final int INDEX_MOVIE_POSTER_PATH = 2;
-    public static final int INDEX_MOVIE_OVERVIEW = 3;
-    public static final int INDEX_MOVIE_RELEASE_DATE = 4;
-    public static final int INDEX_MOVIE_RUNTIME = 5;
-    public static final int INDEX_MOVIE_TITLE = 6;
-    public static final int INDEX_MOVIE_VOTE_AVERAGE = 7;
-    public static final int INDEX_MOVIE_FAVORITE = 8;
+    public static final int INDEX_MOVIE_W92_POSTER = 1;
+    public static final int INDEX_MOVIE_W185_POSTER = 2;
+    public static final int INDEX_MOVIE_POSTER_PATH = 3;
+    public static final int INDEX_MOVIE_OVERVIEW = 4;
+    public static final int INDEX_MOVIE_RELEASE_DATE = 5;
+    public static final int INDEX_MOVIE_RUNTIME = 6;
+    public static final int INDEX_MOVIE_TITLE = 7;
+    public static final int INDEX_MOVIE_VOTE_AVERAGE = 8;
+    public static final int INDEX_MOVIE_FAVORITE = 9;
 
     //Projection and indices for trailers
     public static final String[] TRAILERS_PROJECTION = {
@@ -120,7 +125,7 @@ public class DetailActivity
     private ScrollView mScrollViewMovieData;
 
     //View details about a movie
-    private ImageView mIVSmallPoster;
+    private ImageView mIVw92Poster;
     private TextView mTVOverview;
     private TextView mTVReleaseDate;
     private TextView mTVRuntime;
@@ -158,7 +163,7 @@ public class DetailActivity
         mScrollViewMovieData = (ScrollView) findViewById(R.id.sv_movie_data);
 
         //Views for details
-        mIVSmallPoster = (ImageView) findViewById(R.id.iv_small_poster);
+        mIVw92Poster = (ImageView) findViewById(R.id.iv_w92_poster);
         mTVOverview = (TextView) findViewById(R.id.tv_overview);
         mTVReleaseDate = (TextView) findViewById(R.id.tv_release_date);
         mTVRuntime = (TextView) findViewById(R.id.tv_runtime);
@@ -202,12 +207,12 @@ public class DetailActivity
         if (intent != null) {
 
             //Movie ID must be passed to Intent, otherwise throw exception
-            int movieID = intent.getIntExtra(getString(R.string.movie_key), -1);
-            if (movieID == -1) {
-                throw new IllegalArgumentException(LOG_TAG + ": No movie selected");
+            mMovie = (Movie) intent.getSerializableExtra(getString(R.string.movie_key));
+            if (mMovie == null) {
+                throw new IllegalArgumentException(LOG_TAG + ": Movie must not be null.");
             }
             //Load the data
-            new MovieDetailsQueryTask(this, new MovieDetailsQueryTaskListener()).execute(movieID);
+            new MovieDetailsQueryTask(this, new MovieDetailsQueryTaskListener()).execute(mMovie);
         }
 
     }
@@ -245,12 +250,27 @@ public class DetailActivity
      *
      * @param view The view that was clicked on
      */
-    public void onClickAddToOrRemoveFromFavorites(View view) {
+    public void onClickAddOrRemoveFavorite(View view) {
 
         if (mMovie.isFavorite()) {
+
             Log.d(LOG_TAG, "Removing movie: " + mMovie.getMovieID());
             new MovieRemoveTask(this, new MovieRemoveTaskListener()).execute(mMovie);
+
         } else {
+
+            if (mMovie.getW92Poster() == null) {
+                //Save the image bytes in movie in case it is added to favorites
+                Bitmap bitmap = ((BitmapDrawable) mIVw92Poster.getDrawable()).getBitmap();
+                ByteArrayOutputStream binOutStream = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, binOutStream);
+                byte[] imageInByte = binOutStream.toByteArray();
+                mMovie.setW92Poster(imageInByte);
+
+                Log.d(LOG_TAG, "W92 poster added to movie. Size is " + binOutStream.size() / 1024 + " KB.");
+            }
+
+            //Add movie to database
             Log.d(LOG_TAG, "Adding movie: " + mMovie.getMovieID());
             new MovieInsertTask(this, new MovieInsertTaskListener()).execute(mMovie);
         }
@@ -296,26 +316,28 @@ public class DetailActivity
 
                 if (movie.isFavorite()) {
 
-                    Picasso.with(DetailActivity.this)
-                            .load(posterURLString)
-                            .networkPolicy(NetworkPolicy.OFFLINE)
-                            .into(mIVSmallPoster);
+
+                    //Image is in database
+                    byte[] imageBytes = movie.getW185Poster();
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                    mIVw92Poster.setImageBitmap(bitmap);
 
                     mTVIsFavorite.setText(getString(R.string.remove_from_favorite));
                     mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_on, 0, 0, 0);
 
-                    Log.d(LOG_TAG, "Image loaded from cache");
+                    Log.d(LOG_TAG, "Image loaded from database.");
 
                 } else {
 
+                    //get image from image server
                     Picasso.with(DetailActivity.this)
                             .load(posterURLString)
-                            .into(mIVSmallPoster);
+                            .into(mIVw92Poster);
 
                     mTVIsFavorite.setText(getString(R.string.mark_as_favorite));
                     mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_off, 0, 0, 0);
 
-                    Log.d(LOG_TAG, "Image loaded from server");
+                    Log.d(LOG_TAG, "Image loaded from server: " + posterURLString);
 
                 }
 

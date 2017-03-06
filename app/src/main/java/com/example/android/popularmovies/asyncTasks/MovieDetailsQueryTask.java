@@ -38,11 +38,7 @@ import org.json.JSONException;
 import java.io.IOException;
 import java.net.URL;
 
-import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_FAVORITE;
-import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_ID;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_OVERVIEW;
-import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_POSTER;
-import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_POSTER_PATH;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_RELEASE_DATE;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_RUNTIME;
 import static com.example.android.popularmovies.DetailActivity.INDEX_MOVIE_TITLE;
@@ -65,7 +61,7 @@ import static com.example.android.popularmovies.DetailActivity.TRAILERS_PROJECTI
  * Params is the movie id.
  * Result is a movie object.
  */
-public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
+public class MovieDetailsQueryTask extends AsyncTask<Movie, Void, Movie> {
 
     private static final String LOG_TAG = MovieDetailsQueryTask.class.getSimpleName();
 
@@ -101,12 +97,10 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
      * @return A movie object, including trailers and reviews.
      */
     @Override
-    protected Movie doInBackground(Integer... id) {
+    protected Movie doInBackground(Movie... params) {
 
-        int movieID = id[0];
-        String movieIDString = String.valueOf(movieID);
-        Log.d(LOG_TAG, movieIDString);
-        Movie movie = null;
+        Movie movie = params[0];
+        String movieIDString = String.valueOf(movie.getMovieID());
 
         Uri uri = MovieContract.MovieEntry.CONTENT_URI.buildUpon().
                 appendPath(movieIDString).build();
@@ -114,16 +108,22 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
                 "movie_id=?", new String[]{movieIDString}, null);
 
         if (movieCursor != null && movieCursor.moveToFirst()) {
-            movie = new Movie(movieCursor.getInt(INDEX_MOVIE_ID),
-                    movieCursor.getString(INDEX_MOVIE_POSTER_PATH),
-                    movieCursor.getString(INDEX_MOVIE_OVERVIEW),
-                    movieCursor.getString(INDEX_MOVIE_RELEASE_DATE),
-                    movieCursor.getString(INDEX_MOVIE_TITLE),
-                    movieCursor.getInt(INDEX_MOVIE_RUNTIME),
-                    movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE),
-                    movieCursor.getBlob(INDEX_MOVIE_POSTER),
-                    movieCursor.getInt(INDEX_MOVIE_FAVORITE)
-            );
+//            movie = new Movie(movieCursor.getInt(INDEX_MOVIE_ID),
+//                    movieCursor.getString(INDEX_MOVIE_POSTER_PATH),
+//                    movieCursor.getString(INDEX_MOVIE_OVERVIEW),
+//                    movieCursor.getString(INDEX_MOVIE_RELEASE_DATE),
+//                    movieCursor.getString(INDEX_MOVIE_TITLE),
+//                    movieCursor.getInt(INDEX_MOVIE_RUNTIME),
+//                    movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE),
+//                    movieCursor.getBlob(INDEX_MOVIE_W92_POSTER),
+//                    movieCursor.getBlob(INDEX_MOVIE_W185_POSTER),
+//                    movieCursor.getInt(INDEX_MOVIE_FAVORITE)
+//            );
+            movie.setOverview(movieCursor.getString(INDEX_MOVIE_OVERVIEW));
+            movie.setReleaseDate(movieCursor.getString(INDEX_MOVIE_RELEASE_DATE));
+            movie.setTitle(movieCursor.getString(INDEX_MOVIE_TITLE));
+            movie.setRuntime(movieCursor.getInt(INDEX_MOVIE_RUNTIME));
+            movie.setVoteAverage(movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE));
 
 
             //Retrieve trailers
@@ -176,9 +176,10 @@ public class MovieDetailsQueryTask extends AsyncTask<Integer, Void, Movie> {
 
         } else {
             try {
-                URL url = NetworkUtils.buildMovieURL(String.valueOf(movieID));
+                URL url = NetworkUtils.buildMovieURL(String.valueOf(movie.getMovieID()));
                 String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
-                movie = TMDbJsonUtils.getMovieFromJson(responseStr);
+//                movie = TMDbJsonUtils.getMovieFromJson(responseStr);
+                TMDbJsonUtils.getMovieFromJson(responseStr, movie);
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }

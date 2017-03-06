@@ -22,6 +22,8 @@
 package com.example.android.popularmovies.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -32,7 +34,6 @@ import android.widget.ImageView;
 import com.example.android.popularmovies.R;
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.utilities.NetworkUtils;
-import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 /**
@@ -94,13 +95,12 @@ public class MovieAdapter
 
         if (isFavorite) {
 
-            //TODO get image from database
-            Picasso.with(mContext)
-                    .load(posterURLString)
-                    .networkPolicy(NetworkPolicy.OFFLINE)
-                    .into(holder.mPoster);
+            //Image is in database
+            byte[] imageBytes = mMovies[position].getW185Poster();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            holder.mPoster.setImageBitmap(bitmap);
 
-            Log.d(LOG_TAG, "Image loaded from cache");
+            Log.d(LOG_TAG, "Image loaded from database.");
 
         } else {
 
@@ -108,7 +108,7 @@ public class MovieAdapter
                     .load(posterURLString)
                     .into(holder.mPoster);
 
-            Log.d(LOG_TAG, "Image loaded from server");
+            Log.d(LOG_TAG, "Image loaded from server: " + posterURLString);
 
         }
 
@@ -137,7 +137,7 @@ public class MovieAdapter
     }
 
     /**
-     * Interface for onClick(Movie) method.
+     * Interface for onClick(Movie, View) method.
      */
     public interface MovieAdapterOnClickHandler {
 
@@ -145,8 +145,9 @@ public class MovieAdapter
          * On click on a movie view item the corresponding movie object can be dealt with here.
          *
          * @param movie The movie object that was clicked on.
+         * @param view  The view holding the movie.
          */
-        void onClick(Movie movie);
+        void onClick(Movie movie, View view);
     }
 
     /**
@@ -168,7 +169,7 @@ public class MovieAdapter
          */
         public MovieAdapterViewHolder(View itemView) {
             super(itemView);
-            mPoster = (ImageView) itemView.findViewById(R.id.iv_poster);
+            mPoster = (ImageView) itemView.findViewById(R.id.iv_w185_poster);
             itemView.setOnClickListener(this);
         }
 
@@ -180,7 +181,7 @@ public class MovieAdapter
         @Override
         public void onClick(View view) {
             Movie movie = mMovies[getAdapterPosition()];
-            mClickHandler.onClick(movie);
+            mClickHandler.onClick(movie, view);
         }
     }
 }

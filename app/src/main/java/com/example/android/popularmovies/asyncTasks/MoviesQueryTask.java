@@ -21,6 +21,7 @@
 
 package com.example.android.popularmovies.asyncTasks;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -45,12 +46,15 @@ public class MoviesQueryTask extends AsyncTask<URL, Void, Movie[]> {
 
     private AsyncTaskListener<Movie[]> mListener;
 
+    private Context mContext;
+
     /**
      * References to activity and listener(, which are usually both the same class).
      *
      * @param listener Listener to this task. Triggered before and after task completion.
      */
-    public MoviesQueryTask(AsyncTaskListener<Movie[]> listener) {
+    public MoviesQueryTask(Context context, AsyncTaskListener<Movie[]> listener) {
+        this.mContext = context;
         this.mListener = listener;
     }
 

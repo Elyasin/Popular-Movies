@@ -32,6 +32,8 @@ import com.example.android.popularmovies.models.Movie;
 import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_FAVORITE;
 import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_ID;
 import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_POSTER_PATH;
+import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_W185_POSTER;
+import static com.example.android.popularmovies.MainActivity.INDEX_MOVIE_W92_POSTER;
 import static com.example.android.popularmovies.MainActivity.MOVIES_PROJECTION;
 
 /**
@@ -82,21 +84,31 @@ public class MoviesLocalQueryTask extends AsyncTask<Uri, Void, Movie[]> {
         Cursor cursor = this.mContext.getContentResolver().query(
                 uri, MOVIES_PROJECTION, null, null, null);
 
-        if (cursor != null && cursor.getCount() > 0) {
+        if (cursor != null && !cursor.isClosed()) {
             movieArray = new Movie[cursor.getCount()];
             while (cursor.moveToNext()) {
-                Movie movie = new Movie(
+
+                int pos = cursor.getPosition();
+                movieArray[pos] = new Movie(
                         Integer.valueOf(cursor.getString(INDEX_MOVIE_ID)),
                         cursor.getString(INDEX_MOVIE_POSTER_PATH),
+                        cursor.getBlob(INDEX_MOVIE_W92_POSTER),
+                        cursor.getBlob(INDEX_MOVIE_W185_POSTER),
                         cursor.getInt(INDEX_MOVIE_FAVORITE)
                 );
 
-                movieArray[cursor.getPosition()] = movie;
+                Log.d(LOG_TAG, "Movie created: " +
+                        movieArray[pos].getMovieID() + ", " +
+                        movieArray[pos].getPosterPath() + ", " +
+                        movieArray[pos].getW92Poster().length + ", " +
+                        movieArray[pos].getW185Poster().length + ", " +
+                        movieArray[pos].isFavorite()
+                );
             }
             cursor.close();
         }
 
-        Log.d(LOG_TAG, "Local movie data retrieved");
+        Log.d(LOG_TAG, "Local movie data retrieved.");
 
         return movieArray;
     }
