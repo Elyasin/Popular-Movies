@@ -84,27 +84,30 @@ public class MoviesLocalQueryTask extends AsyncTask<Uri, Void, Movie[]> {
         Cursor cursor = this.mContext.getContentResolver().query(
                 uri, MOVIES_PROJECTION, null, null, null);
 
-        if (cursor != null && !cursor.isClosed()) {
-            movieArray = new Movie[cursor.getCount()];
-            while (cursor.moveToNext()) {
+        try {
+            if (cursor != null && !cursor.isClosed()) {
+                movieArray = new Movie[cursor.getCount()];
+                while (cursor.moveToNext()) {
 
-                int pos = cursor.getPosition();
-                movieArray[pos] = new Movie(
-                        Integer.valueOf(cursor.getString(INDEX_MOVIE_ID)),
-                        cursor.getString(INDEX_MOVIE_POSTER_PATH),
-                        cursor.getBlob(INDEX_MOVIE_W92_POSTER),
-                        cursor.getBlob(INDEX_MOVIE_W185_POSTER),
-                        cursor.getInt(INDEX_MOVIE_FAVORITE)
-                );
+                    int pos = cursor.getPosition();
+                    movieArray[pos] = new Movie(
+                            Integer.valueOf(cursor.getString(INDEX_MOVIE_ID)),
+                            cursor.getString(INDEX_MOVIE_POSTER_PATH),
+                            cursor.getBlob(INDEX_MOVIE_W92_POSTER),
+                            cursor.getBlob(INDEX_MOVIE_W185_POSTER),
+                            cursor.getInt(INDEX_MOVIE_FAVORITE)
+                    );
 
-                Log.d(LOG_TAG, "Movie created: " +
-                        movieArray[pos].getMovieID() + ", " +
-                        movieArray[pos].getPosterPath() + ", " +
-                        movieArray[pos].getW92Poster().length + ", " +
-                        movieArray[pos].getW185Poster().length + ", " +
-                        movieArray[pos].isFavorite()
-                );
+                    Log.d(LOG_TAG, "Movie created: " +
+                            movieArray[pos].getMovieID() + ", " +
+                            movieArray[pos].getPosterPath() + ", " +
+                            movieArray[pos].getW92Poster().length + ", " +
+                            movieArray[pos].getW185Poster().length + ", " +
+                            movieArray[pos].isFavorite()
+                    );
+                }
             }
+        } finally {
             cursor.close();
         }
 

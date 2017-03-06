@@ -233,8 +233,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long id) {
 
-        Log.d(LOG_TAG, "Item selected.");
-
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(POPULAR_MOVIES);
@@ -352,7 +350,9 @@ public class MainActivity extends AppCompatActivity implements
         public void onTaskComplete(Movie[] movieArray) {
             mLoadingIndicator.setVisibility(View.INVISIBLE);
 
-            if (movieArray != null) {
+            Log.d(LOG_TAG, "movieArray has size " + movieArray.length);
+
+            if (movieArray != null && movieArray.length > 0) {
                 mRecyclerViewMovies.setVisibility(View.VISIBLE);
                 mErrorMessageDisplay.setVisibility(View.INVISIBLE);
                 mMovieAdapter.setMovieData(movieArray);

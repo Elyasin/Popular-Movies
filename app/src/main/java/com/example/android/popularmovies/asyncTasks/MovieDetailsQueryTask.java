@@ -91,10 +91,10 @@ public class MovieDetailsQueryTask extends AsyncTask<Movie, Void, Movie> {
     }
 
     /**
-     * Retreival of movie data.
+     * Enrich the movie object wiht more detail information.
      *
-     * @param id The movie id (at position 0).
-     * @return A movie object, including trailers and reviews.
+     * @param params A Movie object at position 0.
+     * @return The Movie object, including trailers and reviews.
      */
     @Override
     protected Movie doInBackground(Movie... params) {
@@ -102,89 +102,93 @@ public class MovieDetailsQueryTask extends AsyncTask<Movie, Void, Movie> {
         Movie movie = params[0];
         String movieIDString = String.valueOf(movie.getMovieID());
 
+
+        //Retrieve movie
         Uri uri = MovieContract.MovieEntry.CONTENT_URI.buildUpon().
                 appendPath(movieIDString).build();
         Cursor movieCursor = this.mContext.getContentResolver().query(uri, MOVIE_DETAIL_PROJECTION,
                 "movie_id=?", new String[]{movieIDString}, null);
 
-        if (movieCursor != null && movieCursor.moveToFirst()) {
-//            movie = new Movie(movieCursor.getInt(INDEX_MOVIE_ID),
-//                    movieCursor.getString(INDEX_MOVIE_POSTER_PATH),
-//                    movieCursor.getString(INDEX_MOVIE_OVERVIEW),
-//                    movieCursor.getString(INDEX_MOVIE_RELEASE_DATE),
-//                    movieCursor.getString(INDEX_MOVIE_TITLE),
-//                    movieCursor.getInt(INDEX_MOVIE_RUNTIME),
-//                    movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE),
-//                    movieCursor.getBlob(INDEX_MOVIE_W92_POSTER),
-//                    movieCursor.getBlob(INDEX_MOVIE_W185_POSTER),
-//                    movieCursor.getInt(INDEX_MOVIE_FAVORITE)
-//            );
-            movie.setOverview(movieCursor.getString(INDEX_MOVIE_OVERVIEW));
-            movie.setReleaseDate(movieCursor.getString(INDEX_MOVIE_RELEASE_DATE));
-            movie.setTitle(movieCursor.getString(INDEX_MOVIE_TITLE));
-            movie.setRuntime(movieCursor.getInt(INDEX_MOVIE_RUNTIME));
-            movie.setVoteAverage(movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE));
+        //Retrieve trailers
+        Uri trailerUri = MovieContract.TrailerEntry.CONTENT_URI.buildUpon().
+                appendPath(movieIDString).build();
+        Cursor trailersCursor = this.mContext.getContentResolver().
+                query(trailerUri, TRAILERS_PROJECTION,
+                        "movie_id=?", new String[]{movieIDString}, null);
+
+        //Retrieve reviews
+        Uri reviewUri = MovieContract.ReviewEntry.CONTENT_URI.buildUpon().
+                appendPath(movieIDString).build();
+        Cursor reviewsCursor = mContext.getContentResolver().query(reviewUri, REVIEWS_PROJECTION,
+                "movie_id=?", new String[]{movieIDString}, null);
 
 
-            //Retrieve trailers
-            Uri trailerUri = MovieContract.TrailerEntry.CONTENT_URI.buildUpon().
-                    appendPath(movieIDString).build();
-            Cursor trailersCursor = this.mContext.getContentResolver().
-                    query(trailerUri, TRAILERS_PROJECTION,
-                            "movie_id=?", new String[]{movieIDString}, null);
+        try {
 
-            if (trailersCursor != null) {
-                Trailer[] trailerArray = new Trailer[trailersCursor.getCount()];
-                while (trailersCursor.moveToNext()) {
-                    Trailer trailer = new Trailer(
-                            trailersCursor.getString(INDEX_TRAILER_ID),
-                            trailersCursor.getString(INDEX_TRAILER_KEY),
-                            trailersCursor.getString(INDEX_TRAILER_NAME),
-                            trailersCursor.getString(INDEX_TRAILER_SITE),
-                            trailersCursor.getString(INDEX_TRAILER_TYPE)
-                    );
-                    trailerArray[trailersCursor.getPosition()] = trailer;
+            if (movieCursor != null && movieCursor.moveToFirst()) {
+
+                movie.setOverview(movieCursor.getString(INDEX_MOVIE_OVERVIEW));
+                movie.setReleaseDate(movieCursor.getString(INDEX_MOVIE_RELEASE_DATE));
+                movie.setTitle(movieCursor.getString(INDEX_MOVIE_TITLE));
+                movie.setRuntime(movieCursor.getInt(INDEX_MOVIE_RUNTIME));
+                movie.setVoteAverage(movieCursor.getFloat(INDEX_MOVIE_VOTE_AVERAGE));
+
+
+                if (trailersCursor != null && !trailersCursor.isClosed()) {
+
+                    Trailer[] trailerArray = new Trailer[trailersCursor.getCount()];
+                    while (trailersCursor.moveToNext()) {
+                        Trailer trailer = new Trailer(
+                                trailersCursor.getString(INDEX_TRAILER_ID),
+                                trailersCursor.getString(INDEX_TRAILER_KEY),
+                                trailersCursor.getString(INDEX_TRAILER_NAME),
+                                trailersCursor.getString(INDEX_TRAILER_SITE),
+                                trailersCursor.getString(INDEX_TRAILER_TYPE)
+                        );
+                        trailerArray[trailersCursor.getPosition()] = trailer;
+                    }
+                    movie.setTrailerArray(trailerArray);
                 }
-                movie.setTrailerArray(trailerArray);
-                trailersCursor.close();
-            }
 
-            //Retrieve reviews
-            Uri reviewUri = MovieContract.ReviewEntry.CONTENT_URI.buildUpon().
-                    appendPath(movieIDString).build();
-            Cursor reviewsCursor = mContext.getContentResolver().query(reviewUri, REVIEWS_PROJECTION,
-                    "movie_id=?", new String[]{movieIDString}, null);
 
-            if (reviewsCursor != null) {
-                Review[] reviewArray = new Review[reviewsCursor.getCount()];
-                while (reviewsCursor.moveToNext()) {
-                    Review review = new Review(
-                            reviewsCursor.getString(INDEX_REVIEW_ID),
-                            reviewsCursor.getString(INDEX_REVIEW_AUTHOR),
-                            reviewsCursor.getString(INDEX_REVIEW_CONTENT),
-                            reviewsCursor.getString(INDEX_REVIEW_URL)
-                    );
-                    reviewArray[reviewsCursor.getPosition()] = review;
+                if (reviewsCursor != null && !reviewsCursor.isClosed()) {
+
+                    Review[] reviewArray = new Review[reviewsCursor.getCount()];
+                    while (reviewsCursor.moveToNext()) {
+                        Review review = new Review(
+                                reviewsCursor.getString(INDEX_REVIEW_ID),
+                                reviewsCursor.getString(INDEX_REVIEW_AUTHOR),
+                                reviewsCursor.getString(INDEX_REVIEW_CONTENT),
+                                reviewsCursor.getString(INDEX_REVIEW_URL)
+                        );
+                        reviewArray[reviewsCursor.getPosition()] = review;
+                    }
+                    movie.setReviewArray(reviewArray);
                 }
-                movie.setReviewArray(reviewArray);
-                reviewsCursor.close();
+
+                Log.d(LOG_TAG, "Local movie data retrieved");
+
+            } else {
+                try {
+
+                    URL url = NetworkUtils.buildMovieURL(String.valueOf(movie.getMovieID()));
+                    String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
+                    TMDbJsonUtils.getMovieFromJson(responseStr, movie);
+
+                    Log.d(LOG_TAG, "Movie data downloaded");
+                } catch (IOException | JSONException e) {
+
+                    Log.e(LOG_TAG, "An error occured while getting HTTP response" +
+                            " or extracing movie data from Json response");
+                    e.printStackTrace();
+                }
             }
+        } finally {
 
             movieCursor.close();
+            trailersCursor.close();
+            reviewsCursor.close();
 
-            Log.d(LOG_TAG, "Local movie data retrieved");
-
-        } else {
-            try {
-                URL url = NetworkUtils.buildMovieURL(String.valueOf(movie.getMovieID()));
-                String responseStr = NetworkUtils.getResponseFromHttpUrl(url);
-//                movie = TMDbJsonUtils.getMovieFromJson(responseStr);
-                TMDbJsonUtils.getMovieFromJson(responseStr, movie);
-            } catch (IOException | JSONException e) {
-                e.printStackTrace();
-            }
-
-            Log.d(LOG_TAG, "Movie data downloaded");
         }
 
         return movie;
