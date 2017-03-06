@@ -2,7 +2,7 @@
 
 ## Instructions
 
-Define your API key for TMDb in the gradle.properties file: MyMovieDbApiKey="YOUR_API_KEY_HERE"
+Define your API key for TMDb in the _gradle.properties_ file: `MyMovieDbApiKey="YOUR_API_KEY_HERE"`
 
 # License information
 
