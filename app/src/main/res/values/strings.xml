@@ -56,5 +56,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
     <string name="review_text">This is a review content. Lorum ipsum movie was very bad and amazing.</string>
     <string name="review_author_text">%s says:</string>
     <string name="movie_query_key">MOVIE_QUERY_KEY</string>
+    <string name="recylcer_view_movies_state_key">MOVIE_RECYCLER_VIEW</string>
 
 </resources>

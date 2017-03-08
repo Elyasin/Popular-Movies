@@ -51,22 +51,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:background="@android:color/holo_blue_dark">-->
-
-            <!--<TextView-->
-            <!--android:id="@+id/tv_title"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:padding="@dimen/title_padding"-->
-            <!--android:textColor="@android:color/white"-->
-            <!--android:textSize="@dimen/title_text_size"-->
-            <!--tools:text="Title" />-->
-            <!--</LinearLayout>-->
-
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

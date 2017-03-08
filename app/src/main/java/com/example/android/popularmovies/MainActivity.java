@@ -23,10 +23,12 @@ package com.example.android.popularmovies;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.IntDef;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -81,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final int INDEX_MOVIE_W185_POSTER = 3;
     public static final int INDEX_MOVIE_FAVORITE = 4;
 
+
     //Define three queries: popular, top rated and favorite
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({POPULAR_MOVIES, TOP_RATED_MOVIES, FAVORITE_MOVIES})
@@ -97,10 +100,15 @@ public class MainActivity extends AppCompatActivity implements
 
     private MovieAdapter mMovieAdapter;
     private RecyclerView mRecyclerViewMovies;
+    private Parcelable mRecyclerViewMoviesState;
+    private GridLayoutManager mLayoutManager;
+
     private ProgressBar mLoadingIndicator;
+
     private TextView mErrorMessageDisplay;
 
-    private int movieQuery;
+
+    private int mMovieQuery;
 
 
     /**
@@ -119,14 +127,27 @@ public class MainActivity extends AppCompatActivity implements
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         mRecyclerViewMovies = (RecyclerView) findViewById(R.id.rv_movies);
-        GridLayoutManager layoutManager = new GridLayoutManager(this, 2);
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mLayoutManager = new GridLayoutManager(this, 2);
+        } else {
+            mLayoutManager = new GridLayoutManager(this, 3);
+        }
         mRecyclerViewMovies.setHasFixedSize(true);
-        mRecyclerViewMovies.setLayoutManager(layoutManager);
+        mRecyclerViewMovies.setLayoutManager(mLayoutManager);
         mMovieAdapter = new MovieAdapter(this, this);
 
         //Setting the adapter will execute notifyDataSetChanged, so no need to query twice
         mRecyclerViewMovies.setAdapter(mMovieAdapter);
         Picasso.with(this).setIndicatorsEnabled(true);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMovieQuery == FAVORITE_MOVIES) {
+            Log.d(LOG_TAG, "Querying favorite database afresh");
+            queryMovieDatabase(FAVORITE_MOVIES);
+        }
     }
 
     /**
@@ -138,10 +159,13 @@ public class MainActivity extends AppCompatActivity implements
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
-        movieQuery =
-                savedInstanceState.getInt(getString(R.string.movie_query_key), POPULAR_MOVIES);
+        mMovieQuery = savedInstanceState.getInt(getString(R.string.movie_query_key), POPULAR_MOVIES);
 
-        Log.d(LOG_TAG, "onRestoreInstanceState: " + movieQuery);
+        //State is saved now, but restored after data is loaded
+        // see onTaskComplete methods of AsyncTaskListener
+        mRecyclerViewMoviesState = savedInstanceState.getParcelable(getString(R.string.recylcer_view_movies_state_key));
+
+        Log.d(LOG_TAG, "onRestoreInstanceState");
     }
 
     /**
@@ -153,10 +177,14 @@ public class MainActivity extends AppCompatActivity implements
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
 
-        outState.putInt(getString(R.string.movie_query_key), movieQuery);
+        outState.putInt(getString(R.string.movie_query_key), mMovieQuery);
 
-        Log.d(LOG_TAG, "onSaveInstanceState: " + movieQuery);
+        mRecyclerViewMoviesState = mRecyclerViewMovies.getLayoutManager().onSaveInstanceState();//save
+        outState.putParcelable(getString(R.string.recylcer_view_movies_state_key), mRecyclerViewMoviesState);
+
+        Log.d(LOG_TAG, "onSaveInstanceState");
     }
+
 
     /**
      * Depending on the movie query either
@@ -209,7 +237,7 @@ public class MainActivity extends AppCompatActivity implements
                 R.array.spinner_items, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
-        spinner.setSelection(movieQuery);
+        spinner.setSelection(mMovieQuery);
 
         //Register MainActivity as listener
         //Should be set after the setAdapter is called, otherwise will trigger with default option
@@ -236,21 +264,23 @@ public class MainActivity extends AppCompatActivity implements
         if (adapterView.getItemAtPosition(pos).equals(getString(R.string.popular))) {
             this.setTitle(getString(R.string.popular));
             queryMovieDatabase(POPULAR_MOVIES);
-            movieQuery = POPULAR_MOVIES;
+            mMovieQuery = POPULAR_MOVIES;
             Log.d(LOG_TAG, "Display popular movies");
 
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.top_rated))) {
             this.setTitle(getString(R.string.top_rated));
             queryMovieDatabase(TOP_RATED_MOVIES);
-            movieQuery = TOP_RATED_MOVIES;
+            mMovieQuery = TOP_RATED_MOVIES;
             Log.d(LOG_TAG, "Display top-rated movies");
 
         } else if (adapterView.getItemAtPosition(pos).equals(getString(R.string.favorite))) {
             this.setTitle(getString(R.string.favorite));
             queryMovieDatabase(FAVORITE_MOVIES);
-            movieQuery = FAVORITE_MOVIES;
+            mMovieQuery = FAVORITE_MOVIES;
             Log.d(LOG_TAG, "Display Favorite movies");
         }
+
+
     }
 
     /**
@@ -315,6 +345,9 @@ public class MainActivity extends AppCompatActivity implements
                 mRecyclerViewMovies.setVisibility(View.VISIBLE);
                 mErrorMessageDisplay.setVisibility(View.INVISIBLE);
                 mMovieAdapter.setMovieData(movieArray);
+                //Restore the layout/position of the RecyclerView
+                Log.d(LOG_TAG, "Trying to restore state of layout");
+                mRecyclerViewMovies.getLayoutManager().onRestoreInstanceState(mRecyclerViewMoviesState);//restore
             } else {
                 mRecyclerViewMovies.setVisibility(View.INVISIBLE);
                 mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
@@ -356,6 +389,10 @@ public class MainActivity extends AppCompatActivity implements
                 mRecyclerViewMovies.setVisibility(View.VISIBLE);
                 mErrorMessageDisplay.setVisibility(View.INVISIBLE);
                 mMovieAdapter.setMovieData(movieArray);
+                //Restore the layout/position of the RecyclerView
+                Log.d(LOG_TAG, "Trying to restore state of layout");
+                mRecyclerViewMovies.getLayoutManager().onRestoreInstanceState(mRecyclerViewMoviesState);//restore
+
             } else {
                 mRecyclerViewMovies.setVisibility(View.INVISIBLE);
                 mErrorMessageDisplay.setText(getString(R.string.no_favorites_in_list));
