@@ -2,7 +2,7 @@
 
 ## Instructions
 
-Define your API key for TMDb in the gradle.properties file: MyMovieDbApiKey="YOUR_API_KEY_HERE"
+Define your API key for TMDb in the _gradle.properties_ file: `MyMovieDbApiKey="YOUR_API_KEY_HERE"`
 
 # License information
 
@@ -10,7 +10,7 @@ The source code is licensed under the MIT license (see below). The documentation
 
 ##MIT License
 
-Copyright (c) 2016 Elyasin Shaladi
+Copyright (c) 2017 Elyasin Shaladi
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
