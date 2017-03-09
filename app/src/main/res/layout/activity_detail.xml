@@ -62,7 +62,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                     android:adjustViewBounds="true"
                     android:contentDescription="@string/small_poster_content_description"
                     android:fitsSystemWindows="true"
-                    tools:src="@drawable/detail_activity_poster"/>
+                    tools:src="@drawable/placeholder_92_138"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -114,7 +114,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                         android:gravity="center_vertical"
                         android:onClick="onClickAddOrRemoveFavorite"
                         android:text="@string/mark_as_favorite"
-                        android:textSize="12sp"
+                        android:textSize="@dimen/favorite_text_size"
                         tools:text="@string/mark_as_favorite"/>
 
                 </LinearLayout>
@@ -202,7 +202,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
                 <View
                     android:layout_width="fill_parent"
                     android:layout_height="2dp"
-                    android:background="#c0c0c0"/>
+                    android:background="@color/greyish"/>
 
                 <TextView
                     android:layout_width="match_parent"

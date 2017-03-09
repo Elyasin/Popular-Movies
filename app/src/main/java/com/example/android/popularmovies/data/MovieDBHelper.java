@@ -99,6 +99,14 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         db.execSQL(CREATE_REVIEW_TABLE);
     }
 
+    /**
+     * Upgrade the table from old version to new version.
+     * TODO Simply dropping tables is not the right thing to do (if you go in production).
+     *
+     * @param db         The SQLite database.
+     * @param oldVersion Old version number.
+     * @param newVersion New version number.
+     */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);

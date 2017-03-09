@@ -149,6 +149,12 @@ public class NetworkUtils {
      */
     public static String getResponseFromHttpUrl(URL url) throws IOException {
         HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+        // set the connection timeout to 5 seconds
+        urlConnection.setConnectTimeout(5000);
+        // set the reading timeout to 10 seconds
+        urlConnection.setReadTimeout(10000);
+
         try {
             InputStream in = urlConnection.getInputStream();
 

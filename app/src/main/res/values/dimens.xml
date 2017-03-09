@@ -41,5 +41,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SO
     <dimen name="review_author_text_size">14sp</dimen>
     <dimen name="empty_trailers_message_text_size">22sp</dimen>
     <dimen name="empty_reviews_message_text_size">22sp</dimen>
+    <dimen name="favorite_text_size">12sp</dimen>
 
 </resources>

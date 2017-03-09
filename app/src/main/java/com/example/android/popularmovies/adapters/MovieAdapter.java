@@ -106,6 +106,7 @@ public class MovieAdapter
 
             Picasso.with(mContext)
                     .load(posterURLString)
+                    .placeholder(R.drawable.placeholder_185_277)
                     .into(holder.mPoster);
 
             Log.d(LOG_TAG, "Image loaded from server: " + posterURLString);
