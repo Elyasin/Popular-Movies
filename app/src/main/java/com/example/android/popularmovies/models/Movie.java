@@ -21,12 +21,13 @@
 
 package com.example.android.popularmovies.models;
 
-import java.io.Serializable;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Represents a movie.
  */
-public class Movie implements Serializable {
+public class Movie implements Parcelable {
 
     private int mMovieID;
     private String mPosterPath;
@@ -187,4 +188,53 @@ public class Movie implements Serializable {
     public void setFavorite(boolean mFavorite) {
         this.mFavorite = mFavorite;
     }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(getMovieID());
+        dest.writeString(getPosterPath());
+        dest.writeByteArray(getW92Poster());
+        dest.writeByteArray(getW185Poster());
+        dest.writeString(getOverview());
+        dest.writeString(getReleaseDate());
+        dest.writeString(getTitle());
+        dest.writeInt(getRuntime());
+        dest.writeDouble(getVoteAverage());
+        dest.writeInt(isFavorite() ? 1 : 0);
+        dest.writeTypedArray(getTrailerArray(), 0);
+        dest.writeTypedArray(getReviewArray(), 0);
+    }
+
+    public static final Parcelable.Creator<Movie> CREATOR
+            = new Parcelable.Creator<Movie>() {
+        public Movie createFromParcel(Parcel in) {
+            return new Movie(in);
+        }
+
+        public Movie[] newArray(int size) {
+            return new Movie[size];
+        }
+    };
+
+    private Movie(Parcel in) {
+        setMovieID(in.readInt());
+        setPosterPath(in.readString());
+        setW92Poster(in.createByteArray());
+        setW185Poster(in.createByteArray());
+        setOverview(in.readString());
+        setReleaseDate(in.readString());
+        setTitle(in.readString());
+        setRuntime(in.readInt());
+        setVoteAverage(in.readDouble());
+        setFavorite(in.readInt());
+        setTrailerArray(in.createTypedArray(Trailer.CREATOR));
+        setReviewArray(in.createTypedArray(Review.CREATOR));
+    }
+
 }

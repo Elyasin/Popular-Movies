@@ -21,10 +21,13 @@
 
 package com.example.android.popularmovies.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Represents a movie review.
  */
-public class Review {
+public class Review implements Parcelable {
 
     private String reviewID;
     private String author;
@@ -70,4 +73,36 @@ public class Review {
         this.urlString = urlString;
     }
 
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(getReviewID());
+        dest.writeString(getAuthor());
+        dest.writeString(getContent());
+        dest.writeString(getUrlString());
+    }
+
+    public static final Parcelable.Creator<Review> CREATOR
+            = new Parcelable.Creator<Review>() {
+        public Review createFromParcel(Parcel in) {
+            return new Review(in);
+        }
+
+        public Review[] newArray(int size) {
+            return new Review[size];
+        }
+    };
+
+    private Review(Parcel in) {
+        setReviewID(in.readString());
+        setAuthor(in.readString());
+        setContent(in.readString());
+        setUrlString(in.readString());
+    }
 }

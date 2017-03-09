@@ -26,16 +26,22 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
+import android.transition.Slide;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.example.android.popularmovies.adapters.ReviewAdapter;
@@ -48,6 +54,7 @@ import com.example.android.popularmovies.data.MovieContract;
 import com.example.android.popularmovies.models.Movie;
 import com.example.android.popularmovies.models.Review;
 import com.example.android.popularmovies.models.Trailer;
+import com.example.android.popularmovies.transform.CutOutTriangleTransform;
 import com.example.android.popularmovies.utilities.NetworkUtils;
 import com.squareup.picasso.Picasso;
 
@@ -122,7 +129,7 @@ public class DetailActivity
     //The main top level views
     private ProgressBar mLoadingIndicator;
     private TextView mErrorMessageDisplay;
-    private ScrollView mScrollViewMovieData;
+    private NestedScrollView mScrollViewMovieData;
 
     //View details about a movie
     private ImageView mIVw92Poster;
@@ -143,7 +150,13 @@ public class DetailActivity
     private RecyclerView mRVReviews;
     private ReviewAdapter mReviewAdapter;
     private TextView mTVReviewsEmptyView;
+
+    //The movies
     private Movie mMovie;
+
+
+    private CollapsingToolbarLayout collapsingToolbarLayout;
+
 
     /**
      * Sets up the activity with data passed through the Intent.
@@ -154,13 +167,30 @@ public class DetailActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Slide transition = new Slide();
+            transition.excludeTarget(android.R.id.statusBarBackground, true);
+            getWindow().setEnterTransition(transition);
+            getWindow().setReturnTransition(transition);
+        }
+
         setContentView(R.layout.activity_detail);
+
+        ViewCompat.setTransitionName(findViewById(R.id.app_bar_layout), "transition");
+        supportPostponeEnterTransition();
+
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        //Title is set (later) when querying
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+
 
         //Top-level main views
         mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message);
         mErrorMessageDisplay.setText(getString(R.string.no_internet_access));
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
-        mScrollViewMovieData = (ScrollView) findViewById(R.id.sv_movie_data);
+        mScrollViewMovieData = (NestedScrollView) findViewById(R.id.nsv_movie_data);
 
         //Views for details
         mIVw92Poster = (ImageView) findViewById(R.id.iv_w92_poster);
@@ -205,12 +235,17 @@ public class DetailActivity
 
         Intent intent = getIntent();
         if (intent != null) {
-
             //Movie ID must be passed to Intent, otherwise throw exception
-            mMovie = (Movie) intent.getSerializableExtra(getString(R.string.movie_key));
+            mMovie = (Movie) intent.getParcelableExtra(getString(R.string.movie_key));
             if (mMovie == null) {
                 throw new IllegalArgumentException(LOG_TAG + ": Movie must not be null.");
             }
+
+            //Set the title and make it "invisible" when toolbar expanded
+            collapsingToolbarLayout.setTitle(mMovie.getTitle());
+            collapsingToolbarLayout.setExpandedTitleColor(
+                    ContextCompat.getColor(this, android.R.color.transparent));
+
             //Load the data
             new MovieDetailsQueryTask(this, new MovieDetailsQueryTaskListener()).execute(mMovie);
         }
@@ -227,10 +262,14 @@ public class DetailActivity
 
         Log.d(LOG_TAG, "Start new intent to show trailer " + trailer.getName());
 
-        startActivity(
-                new Intent(Intent.ACTION_VIEW,
-                        Uri.parse(NetworkUtils.YOUTUBE_BASE_URL + trailer.getKey()))
+        Intent intent = new Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse(NetworkUtils.YOUTUBE_BASE_URL + trailer.getKey())
         );
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     /**
@@ -320,7 +359,7 @@ public class DetailActivity
                     //Image is in database
                     byte[] imageBytes = movie.getW185Poster();
                     Bitmap bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                    mIVw92Poster.setImageBitmap(bitmap);
+                    mIVw92Poster.setImageBitmap(new CutOutTriangleTransform().transform(bitmap));
 
                     mTVIsFavorite.setText(getString(R.string.remove_from_favorite));
                     mTVIsFavorite.setCompoundDrawablesWithIntrinsicBounds(android.R.drawable.btn_star_big_on, 0, 0, 0);
@@ -332,6 +371,7 @@ public class DetailActivity
                     //get image from image server
                     Picasso.with(DetailActivity.this)
                             .load(posterURLString)
+                            .transform(new CutOutTriangleTransform())
                             .into(mIVw92Poster);
 
                     mTVIsFavorite.setText(getString(R.string.mark_as_favorite));
