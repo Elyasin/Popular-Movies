@@ -373,6 +373,7 @@ public class DetailActivity
                             .load(posterURLString)
                             .transform(new CutOutTriangleTransform())
                             .placeholder(R.drawable.placeholder_92_138)
+                            .error(R.drawable.placeholder_92_138)
                             .into(mIVw92Poster);
 
                     mTVIsFavorite.setText(getString(R.string.mark_as_favorite));
